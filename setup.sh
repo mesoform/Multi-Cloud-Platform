@@ -81,7 +81,6 @@ installLinuxDependencies() {
 
     # Install triton-kubernetes
 
-
 }
 
 installDarwinDependencies() {
@@ -143,14 +142,14 @@ setupManager() {
     echo ""
 
     echo "Triton Kubernetes version: $(${TK8S} version)"
-    #${TK8S} create manager --non-interactive --config "${SCRIPT_DIR}/${MANAGER_CONFIG}"
+    ${TK8S} create manager --non-interactive --config "${SCRIPT_DIR}/${MANAGER_CONFIG}"
 }
 
 setupCluster() {
     echo ""
     echo "Creating cluster"
     echo ""
-    #${TK8S} create cluster --non-interactive --config "${SCRIPT_DIR}/${CLUSTER_CONFIG}"
+    ${TK8S} create cluster --non-interactive --config "${SCRIPT_DIR}/${CLUSTER_CONFIG}"
 }
 
 runSetup

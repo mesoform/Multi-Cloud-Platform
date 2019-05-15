@@ -1,6 +1,6 @@
 # Multi cloud plaform scripts
 
-Multi clund platform contains scripts and configurations to non interactive deployment of Triton Kubernetes solutions.
+Multi clund platform contains scripts and configurations to runn interactive deployment of Triton Kubernetes solution.
 
 ## Quick start guide
 
