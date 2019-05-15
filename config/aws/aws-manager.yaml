@@ -1,0 +1,21 @@
+# This config file will create a Cluster Manager which will be running on AWS
+backend_provider: local
+name: mf-manager
+manager_cloud_provider: aws
+private_registry: ""
+private_registry_username: ""
+private_registry_password: ""
+rancher_server_image: ""
+rancher_agent_image: ""
+rancher_admin_password: Dfrfyne.
+aws_access_key: AKIASEG5YA6MM7RRLVNL
+aws_secret_key: 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
+aws_region: us-east-2
+aws_vpc_cidr: 10.0.0.0/16
+aws_subnet_cidr: 10.0.2.0/24
+aws_public_key_path: ~/.ssh/ilm_aws_rsa.pub
+aws_private_key_path: ~/.ssh/ilm_aws_rsa
+aws_key_name: triton-kubernetes_public_key_01
+aws_ssh_user: ubuntu
+aws_ami_id: ami-0510c89f1a2691cf2
+aws_instance_type: t2.small
