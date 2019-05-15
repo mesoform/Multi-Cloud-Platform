@@ -29,11 +29,17 @@ GCP_CLUSTER=config/gcp/gcp-cluster.yaml
 MANAGER_CONFIG=${GCP_MANAGER}
 CLUSTER_CONFIG=${GCP_CLUSTER}
 
+GET_MANAGER_CONFIG=config/get-manager.yaml
+
 runSetup() {
     installDependencies
     setupManager
     sleep 5
     setupCluster
+
+    # Getting info about created manager
+    ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+
 }
 
 installDependencies() {
