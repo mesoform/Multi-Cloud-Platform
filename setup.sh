@@ -85,6 +85,27 @@ installLinuxDependencies() {
     fi
 
     # Install triton-kubernetes
+    if [[ ! -e "${TK8S}" ]]; then
+        echo ""
+        echo "Getting the triton-kubernetes ..."
+        echo ""
+
+        cd ${BIN}
+        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_linux-amd64.zip
+        TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
+
+        echo "URL: ${TK8S_URL_DAR}"
+        echo "File: ${TK8S_FILE_DAR}"
+
+        curl -L "${TK8S_URL_DAR}" --output "${TK8S_FILE_DAR}"
+        unzip "${TK8S_FILE_DAR}"
+        rm "${TK8S_FILE_DAR}"
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "triton-kubernetes for $OS installed"
+        echo ""
+    fi
 }
 
 installDarwinDependencies() {
