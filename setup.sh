@@ -13,8 +13,8 @@ TERRAFORM="${BIN}/terraform"
 TK8S="${BIN}/triton-kubernetes"
 
 SOURCE_URL_BASE=github.com/mesoform/triton-kubernetes
-if [[ -d "~/go/src/${SOURCE_URL_BASE}"  ]]; then
-    export SOURCE_URL="~/go/src/${SOURCE_URL_BASE}"
+if [[ -e "$HOME/go/src/${SOURCE_URL_BASE}"  ]]; then
+    export SOURCE_URL="$HOME/go/src/${SOURCE_URL_BASE}"
 else
     export SOURCE_URL="${SOURCE_URL_BASE}"
 fi
@@ -26,8 +26,8 @@ AWS_CLUSTER=config/aws/aws-cluster.yaml
 GCP_MANAGER=config/gcp/gcp-manager.yaml
 GCP_CLUSTER=config/gcp/gcp-cluster.yaml
 
-MANAGER_CONFIG=${AWS_MANAGER}
-CLUSTER_CONFIG=${AWS_CLUSTER}
+MANAGER_CONFIG=${GCP_MANAGER}
+CLUSTER_CONFIG=${GCP_CLUSTER}
 
 GET_MANAGER_CONFIG=config/get-manager.yaml
 
