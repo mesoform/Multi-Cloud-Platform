@@ -1,5 +1,5 @@
 # This config file will create a cluster on AWS
-cluster_manager: mf-manager
+cluster_manager: mf-manager-01
 backend_provider: local
 name: mf-cluster
 cluster_cloud_provider: aws

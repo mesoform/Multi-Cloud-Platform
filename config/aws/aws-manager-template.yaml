@@ -1,6 +1,6 @@
 # This config file will create a Cluster Manager which will be running on AWS
 backend_provider: local
-name: mf-manager
+name: mf-manager-01
 manager_cloud_provider: aws
 private_registry: ""
 private_registry_username: ""

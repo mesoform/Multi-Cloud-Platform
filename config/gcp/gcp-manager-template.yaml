@@ -1,6 +1,6 @@
 # This config file will create a Cluster Manager which will be running on Google Cloud Platform
 backend_provider: local
-name: mf-gcp-man01
+name: mf-manager-01
 manager_cloud_provider: gcp
 private_registry: ""
 private_registry_username: ""

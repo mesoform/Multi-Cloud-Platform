@@ -26,8 +26,8 @@ AWS_CLUSTER=config/aws/aws-cluster.yaml
 GCP_MANAGER=config/gcp/gcp-manager.yaml
 GCP_CLUSTER=config/gcp/gcp-cluster.yaml
 
-MANAGER_CONFIG=${GCP_MANAGER}
-CLUSTER_CONFIG=${GCP_CLUSTER}
+MANAGER_CONFIG=${AWS_MANAGER}
+CLUSTER_CONFIG=${AWS_CLUSTER}
 
 GET_MANAGER_CONFIG=config/get-manager.yaml
 
@@ -39,7 +39,6 @@ runSetup() {
 
     # Getting info about created manager
     ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
-
 }
 
 installDependencies() {
@@ -58,13 +57,12 @@ installDependencies() {
             exit 1
             ;;
     esac
-
 }
 
 installLinuxDependencies() {
     # Install JSON processor
     echo "Getting jq ..."
-    apt-get install -y jq
+    sudo apt-get install -y jq
 
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
@@ -73,7 +71,8 @@ installLinuxDependencies() {
         echo ""
 
         cd ${BIN}
-        TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
+        #TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
+        TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.12/terraform_0.11.12_linux_amd64.zip
         TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
         wget "${TERRAFORM_URL_LIN}"
         unzip -o "${TERRAFORM_FILE_LIN}"
@@ -86,7 +85,6 @@ installLinuxDependencies() {
     fi
 
     # Install triton-kubernetes
-
 }
 
 installDarwinDependencies() {
@@ -139,7 +137,6 @@ installDarwinDependencies() {
         echo "triton-kubernetes for $OS installed"
         echo ""
     fi
-
 }
 
 setupManager() {
@@ -159,4 +156,7 @@ setupCluster() {
 }
 
 runSetup
+
+echo ""
 echo "Done"
+echo ""
