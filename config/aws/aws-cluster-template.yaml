@@ -1,7 +1,7 @@
 # This config file will create a cluster on AWS
 cluster_manager: mf-manager-01
 backend_provider: local
-name: mf-cluster
+name: mf-aws-cluster01
 cluster_cloud_provider: aws
 k8s_version: v1.13.4-rancher1-1
 k8s_network_provider: calico
