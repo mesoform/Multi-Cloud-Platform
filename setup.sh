@@ -91,15 +91,15 @@ installLinuxDependencies() {
         echo ""
 
         cd ${BIN}
-        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_linux-amd64.zip
-        TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
+        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_linux-amd64.zip
+        TK8S_FILE_LIN="${TK8S_URL_LIN##*/}"
 
-        echo "URL: ${TK8S_URL_DAR}"
-        echo "File: ${TK8S_FILE_DAR}"
+        echo "URL: ${TK8S_URL_LIN}"
+        echo "File: ${TK8S_FILE_LIN}"
 
-        curl -L "${TK8S_URL_DAR}" --output "${TK8S_FILE_DAR}"
-        unzip "${TK8S_FILE_DAR}"
-        rm "${TK8S_FILE_DAR}"
+        wget "${TK8S_URL_LIN}"
+        unzip "${TK8S_FILE_LIN}"
+        rm "${TK8S_FILE_LIN}"
         cd "${SCRIPT_DIR}"
 
         echo ""
