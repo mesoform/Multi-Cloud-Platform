@@ -35,6 +35,11 @@ runSetup() {
     installDependencies
     setupManager
     sleep 5
+    CLUSTER_CONFIG=${AWS_CLUSTER}
+    setupCluster
+
+    sleep 5
+    CLUSTER_CONFIG=${GCP_CLUSTER}
     setupCluster
 
     # Getting info about created manager
