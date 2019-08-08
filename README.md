@@ -26,6 +26,53 @@ cp config/gcp/gcp-cluster-template.yaml config/gcp/gcp-cluster.yaml
 ```
 
 Make changes in the configuration files according to the description which is present for parameters.
+Draw attention the the following parametes:
+
+1.  AWS configuration files
+
+1.1 Manager
+
+```
+rancher_admin_password: change
+aws_access_key: "change"
+aws_secret_key: "change"
+
+aws_public_key_path: ~/.ssh/it_rsa.pub
+aws_private_key_path: ~/.ssh/it_rsa
+```
+
+1.2 Cluster
+
+```
+aws_access_key: "change"
+aws_secret_key: "change"
+
+aws_public_key_path: ~/.ssh/it_rsa.pub
+aws_private_key_path: ~/.ssh/it_rsa
+```
+
+2.  GCP configuration files
+
+2.1 Manager
+
+```
+gcp_path_to_credentials: ~/.ssh/gcp.json
+
+gcp_public_key_path: ~/.ssh/it_rsa.pub
+gcp_private_key_path: ~/.ssh/it_rsa
+
+rancher_admin_password: change
+```
+
+2.2 Cluster
+
+```
+gcp_path_to_credentials: ~/.ssh/gcp.json
+
+gcp_public_key_path: ~/.ssh/it_rsa.pub
+gcp_private_key_path: ~/.ssh/it_rsa
+
+```
 
 Choose the cloud in `setup.sh` by editing variables
 

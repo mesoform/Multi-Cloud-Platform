@@ -6,6 +6,8 @@ config/aws/aws-manager.yaml
 config/gcp/gcp-cluster.yaml
 config/gcp/gcp-manager.yaml
 
+**/.*.swp
+
 # Created by https://www.gitignore.io/api/macos
 
 ### macOS ###
