@@ -16,7 +16,7 @@ help() {
    echo "  all        Setup cluster namager and Kubernetes cluster on all supported clouds"
    echo ""
    echo "Destroy options:"
-   echo "  manager   The name of cluster manager to destroy."
+   echo "  manager   Destroy current manager and associated clusters"
    echo ""
 }
 
