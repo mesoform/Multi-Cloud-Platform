@@ -74,17 +74,22 @@ gcp_private_key_path: ~/.ssh/it_rsa
 
 ```
 
-Choose the cloud in `setup.sh` by editing variables
+### Run the setup
+
+Run `setup` command and specify cloud name (aws, gcp, all)
 
 ```
-MANAGER_CONFIG=${GCP_MANAGER}
-CLUSTER_CONFIG=${GCP_CLUSTER}
+./mcadm.sh setup aws
 ```
 
-Run the setup script
-
-```
-./setup.sh
-```
+Run `./mcadm.sh help` to see details about script usage.
 
 The information about Cluster Manager and Kubernetes Cluster will be shown in the console output.
+
+### Cleanup
+
+To remove all the resources created by script run the command
+
+```
+./mcadm.sh destroy manager
+```
