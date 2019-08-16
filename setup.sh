@@ -264,6 +264,7 @@ case "${COMMAND}" in
     ;;
 
   destroy)
+    runDestroy
     ;;
 
   *)
