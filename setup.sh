@@ -1,12 +1,42 @@
 #!/usr/bin/env bash
 
 set -e
-set -u
 set -o pipefail
 
+help() {
+   echo "Usage: ${SCRIPT_NAME} <command> [opitons]"
+   echo ""
+   echo "Commands:"
+   echo "  setup      Setup multi-cloud Kubernetes"
+   echo "  destroy    Destroy cluster manager and all associated clouds"
+   echo ""
+   echo "Setup options:"
+   echo "  aws        Setup cluster namager and Kubernetes cluster on AWS"
+   echo "  gcp        Setup cluster namager and Kubernetes cluster on Google cloud"
+   echo "  all        Setup cluster namager and Kubernetes cluster on all supported clouds"
+   echo ""
+   echo "Destroy options:"
+   echo "  manager   The name of cluster manager to destroy."
+   echo ""
+}
+
+SCRIPT_NAME=$0
+
+# Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+COMMAND=$1
+[[ -z "${COMMAND}" ]] && help && exit 1
+shift
+
+OPTION_1=$1
+[[ -z "${OPTION_1}" ]] && help && exit 1
+shift
+
+set -u
+
 BIN="${SCRIPT_DIR}/bin"
-mkdir -p ${BIN}
+mkdir -p "${BIN}"
 PATH="${BIN}:${PATH}"
 
 TERRAFORM="${BIN}/terraform"
@@ -26,30 +56,67 @@ AWS_CLUSTER=config/aws/aws-cluster.yaml
 GCP_MANAGER=config/gcp/gcp-manager.yaml
 GCP_CLUSTER=config/gcp/gcp-cluster.yaml
 
-MANAGER_CONFIG=${GCP_MANAGER}
-CLUSTER_CONFIG=${GCP_CLUSTER}
-
 GET_MANAGER_CONFIG=config/get-manager.yaml
 
 runSetup() {
-    installDependencies
-    setupManager
-    sleep 5
-    CLUSTER_CONFIG=${AWS_CLUSTER}
-    setupCluster
+  installDependencies
 
-    sleep 5
-    CLUSTER_CONFIG=${GCP_CLUSTER}
-    setupCluster
+  case "${OPTION_1}" in
+    aws)
+      MANAGER_CONFIG=${AWS_MANAGER}
+      CLUSTER_CONFIG=${AWS_CLUSTER}
+      setupManager
+      sleep 5
+      setupCluster
+      ;;
 
-    # Getting info about created manager
-    ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+    gcp)
+      MANAGER_CONFIG=${GCP_MANAGER}
+      CLUSTER_CONFIG=${GCP_CLUSTER}
+      setupManager
+      sleep 5
+      setupCluster
+      ;;
+
+    all)
+      MANAGER_CONFIG=${GCP_MANAGER}
+      CLUSTER_CONFIG=${GCP_CLUSTER}
+      setupManager
+      sleep 5
+      setupCluster
+
+      sleep 5
+      CLUSTER_CONFIG=${AWS_CLUSTER}
+      setupCluster
+      ;;
+
+    *)
+      help && exit 1
+      ;;
+  esac
+
+  # Getting info about created manager
+  ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
 }
+
+runDestroy() {
+  case "${OPTION_1}" in
+    manager)
+      destroyManager
+      ;;
+
+    *)
+      help && exit 1
+      ;;
+  esac
+
+}
+
 
 installDependencies() {
     echo "Installing dependencies"
 
-    OS="`uname`"
+    OS="$(uname)"
     case ${OS} in
         'Linux')
             installLinuxDependencies
@@ -75,7 +142,7 @@ installLinuxDependencies() {
         echo "Getting the terraform ..."
         echo ""
 
-        cd ${BIN}
+        cd "${BIN}"
         #TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
         TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.12/terraform_0.11.12_linux_amd64.zip
         TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
@@ -95,7 +162,7 @@ installLinuxDependencies() {
         echo "Getting the triton-kubernetes ..."
         echo ""
 
-        cd ${BIN}
+        cd "${BIN}"
         TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_linux-amd64.zip
         TK8S_FILE_LIN="${TK8S_URL_LIN##*/}"
 
@@ -124,7 +191,7 @@ installDarwinDependencies() {
         echo "Getting the terraform ..."
         echo ""
 
-        cd ${BIN}
+        cd "${BIN}"
         TERRAFORM_URL_DAR=https://releases.hashicorp.com/terraform/0.11.12/terraform_0.11.12_darwin_amd64.zip
         TERRAFORM_FILE_DAR="${TERRAFORM_URL_DAR##*/}"
 
@@ -147,7 +214,7 @@ installDarwinDependencies() {
         echo "Getting the triton-kubernetes ..."
         echo ""
 
-        cd ${BIN}
+        cd "${BIN}"
         TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_osx-amd64.zip
         TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
 
@@ -181,7 +248,28 @@ setupCluster() {
     ${TK8S} create cluster --non-interactive --config "${SCRIPT_DIR}/${CLUSTER_CONFIG}"
 }
 
-runSetup
+function destroyManager() {
+    echo ""
+    echo "Destroing manager"
+    echo ""
+
+    echo "Triton Kubernetes version: $(${TK8S} version)"
+    ${TK8S} destroy manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+}
+
+
+case "${COMMAND}" in
+  setup)
+    runSetup
+    ;;
+
+  destroy)
+    ;;
+
+  *)
+    help && exit 1
+    ;;
+esac
 
 echo ""
 echo "Done"

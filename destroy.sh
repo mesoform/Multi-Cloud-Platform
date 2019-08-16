@@ -26,24 +26,23 @@ AWS_CLUSTER=config/aws/aws-cluster.yaml
 GCP_MANAGER=config/gcp/gcp-manager.yaml
 GCP_CLUSTER=config/gcp/gcp-cluster.yaml
 
-MANAGER_CONFIG=${GCP_MANAGER}
-CLUSTER_CONFIG=${GCP_CLUSTER}
+MANAGER_CONFIG=${AWS_MANAGER}
+CLUSTER_CONFIG=${AWS_CLUSTER}
 
 GET_MANAGER_CONFIG=config/get-manager.yaml
 
 runSetup() {
     installDependencies
     destroyManager
-    sleep 5
-    CLUSTER_CONFIG=${AWS_CLUSTER}
-    destroyCluster
+#    sleep 5
+#    destroyCluster
 
-    sleep 5
-    CLUSTER_CONFIG=${GCP_CLUSTER}
-    destroyCluster
-
-    # Getting info about created manager
-    ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+#    sleep 5
+#    CLUSTER_CONFIG=${GCP_CLUSTER}
+#    destroyCluster
+#
+#    # Getting info about created manager
+#    ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
 }
 
 installDependencies() {
@@ -171,7 +170,8 @@ destroyManager() {
     echo ""
 
     echo "Triton Kubernetes version: $(${TK8S} version)"
-    ${TK8S} destroy manager --non-interactive --config "${SCRIPT_DIR}/${MANAGER_CONFIG}"
+    ${TK8S} destroy manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+#    ${TK8S} destroy manager --non-interactive --config "${SCRIPT_DIR}/${MANAGER_CONFIG}"
 }
 
 destroyCluster() {
