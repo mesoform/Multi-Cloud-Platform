@@ -1,0 +1,24 @@
+# This config file will create an HA cluster on Joyent Cloud (Triton) attached to triton-ha Cluster Manager
+cluster_manager: mf-manager-01
+backend_provider: local
+cluster_name: mf-gcp-cluster01
+cluster_cloud_provider: gcp
+k8s_version: v1.13.4-rancher1-1
+k8s_network_provider: calico
+private_registry: ""
+private_registry_username: ""
+private_registry_password: ""
+k8s_registry: ""
+k8s_registry_username: ""
+k8s_registry_password: ""
+gcp_path_to_credentials: ~/.ssh/gcp.json
+gcp_compute_region: us-east1
+node_count: 2
+rancher_host_label: worker
+hostname: mf-gcp-wrk
+gcp_instance_zone: us-east1-b
+gcp_machine_type: g1-small
+gcp_image: ubuntu-1604-xenial-v20190430
+gcp_public_key_path: ~/.ssh/it_rsa.pub
+gcp_private_key_path: ~/.ssh/it_rsa
+gcp_ssh_user: root

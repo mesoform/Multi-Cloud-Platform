@@ -9,6 +9,7 @@ help() {
    echo "Commands:"
    echo "  setup      Setup multi-cloud Kubernetes"
    echo "  destroy    Destroy cluster manager and all associated clouds"
+   echo "  add        Adding instances for existing cluster"
    echo ""
    echo "Setup options:"
    echo "  aws        Setup cluster namager and Kubernetes cluster on AWS"
@@ -16,7 +17,14 @@ help() {
    echo "  all        Setup cluster namager and Kubernetes cluster on all supported clouds"
    echo ""
    echo "Destroy options:"
-   echo "  manager   Destroy current manager and associated clusters"
+   echo "  manager    Destroy current manager and associated clusters"
+   echo ""
+   echo "Add options:"
+   echo " node        Add node to current cluster"
+   echo ""
+   echo "Add node options:"
+   echo "  aws        Create node for cluster on AWS"
+   echo "  gcp        Create node for cluster on Google cloud"
    echo ""
 }
 
@@ -32,6 +40,9 @@ shift
 OPTION_1=$1
 [[ -z "${OPTION_1}" ]] && help && exit 1
 shift
+
+OPTION_2=$1
+[[ -z "${OPTION_2}" ]]
 
 set -u
 
@@ -52,9 +63,11 @@ export SOURCE_REF=master
 
 AWS_MANAGER=config/aws/aws-manager.yaml
 AWS_CLUSTER=config/aws/aws-cluster.yaml
+AWS_NODE=config/aws/aws-node.yaml
 
 GCP_MANAGER=config/gcp/gcp-manager.yaml
 GCP_CLUSTER=config/gcp/gcp-cluster.yaml
+GCP_NODE=config/gcp/gcp-node.yaml
 
 GET_MANAGER_CONFIG=config/get-manager.yaml
 
@@ -112,6 +125,20 @@ runDestroy() {
 
 }
 
+runAdd() {
+  case "${OPTION_1}" in
+    node)
+      addNode
+      ;;
+
+    *)
+      help && exit 1
+      ;;
+  esac
+
+}
+
+
 
 installDependencies() {
     echo "Installing dependencies"
@@ -144,7 +171,7 @@ installLinuxDependencies() {
 
         cd "${BIN}"
         #TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
-        TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.12/terraform_0.11.12_linux_amd64.zip
+        TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip
         TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
         wget "${TERRAFORM_URL_LIN}"
         unzip -o "${TERRAFORM_FILE_LIN}"
@@ -192,7 +219,7 @@ installDarwinDependencies() {
         echo ""
 
         cd "${BIN}"
-        TERRAFORM_URL_DAR=https://releases.hashicorp.com/terraform/0.11.12/terraform_0.11.12_darwin_amd64.zip
+        TERRAFORM_URL_DAR=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_darwin_amd64.zip
         TERRAFORM_FILE_DAR="${TERRAFORM_URL_DAR##*/}"
 
         echo "URL: ${TERRAFORM_URL_DAR}"
@@ -248,6 +275,27 @@ setupCluster() {
     ${TK8S} create cluster --non-interactive --config "${SCRIPT_DIR}/${CLUSTER_CONFIG}"
 }
 
+addNode() {
+  echo ""
+  echo "Adding node"
+  echo ""
+
+  case "${OPTION_2}" in
+    aws)
+      NODE_CONFIG=${AWS_NODE}
+      ;;
+
+    gcp)
+      NODE_CONFIG=${GCP_NODE}
+      ;;
+
+    *)
+      help && exit 1
+      ;;
+  esac
+  ${TK8S} create node --non-interactive --config "${SCRIPT_DIR}/${NODE_CONFIG}"
+}
+
 function destroyManager() {
     echo ""
     echo "Destroing manager"
@@ -265,6 +313,10 @@ case "${COMMAND}" in
 
   destroy)
     runDestroy
+    ;;
+
+  add)
+    runAdd
     ;;
 
   *)
