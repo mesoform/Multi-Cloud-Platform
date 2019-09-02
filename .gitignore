@@ -1,12 +1,8 @@
 bin/
 .idea/
 
-config/aws/aws-cluster.yaml
-config/aws/aws-manager.yaml
-config/aws/aws-node.yaml
-config/gcp/gcp-cluster.yaml
-config/gcp/gcp-manager.yaml
-config/gcp/gcp-node.yaml
+config/*
+!config/templates
 
 **/.*.swp
 
