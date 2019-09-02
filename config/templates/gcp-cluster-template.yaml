@@ -1,7 +1,7 @@
 # This config file will create an HA cluster on Joyent Cloud (Triton) attached to triton-ha Cluster Manager
-cluster_manager: mf-manager-01
+cluster_manager: {{MANAGER_NAME}}
 backend_provider: local
-name: mf-gcp-cluster01
+name: {{CLUSTER_NAME}}
 cluster_cloud_provider: gcp
 k8s_version: v1.13.4-rancher1-1
 k8s_network_provider: calico
@@ -11,33 +11,33 @@ private_registry_password: ""
 k8s_registry: ""
 k8s_registry_username: ""
 k8s_registry_password: ""
-gcp_path_to_credentials: ~/.ssh/gcp.json
+gcp_path_to_credentials: {{GCP_PATH_TO_CREDENTIALS}}
 gcp_compute_region: us-east1
 nodes:
   - node_count: 1
     rancher_host_label: etcd
-    hostname: mf-gcp-etcd
+    hostname: {{ETCD_NODE_NAME}}
     gcp_instance_zone: us-east1-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
-    gcp_public_key_path: ~/.ssh/it_rsa.pub
-    gcp_private_key_path: ~/.ssh/it_rsa
+    gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
+    gcp_private_key_path: {{GCP_PRIVATE_KEY_PATH}}
     gcp_ssh_user: root
   - node_count: 1
     rancher_host_label: control
-    hostname: mf-gcp-ctrl
+    hostname: {{CONTROL_NODE_NAME}}
     gcp_instance_zone: us-east1-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
-    gcp_public_key_path: ~/.ssh/it_rsa.pub
-    gcp_private_key_path: ~/.ssh/it_rsa
+    gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
+    gcp_private_key_path: {{GCP_PRIVATE_KEY_PATH}}
     gcp_ssh_user: root
   - node_count: 2
     rancher_host_label: worker
-    hostname: mf-gcp-wrk
+    hostname: {{WORKER_NODE_NAME}}
     gcp_instance_zone: us-east1-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
-    gcp_public_key_path: ~/.ssh/it_rsa.pub
-    gcp_private_key_path: ~/.ssh/it_rsa
+    gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
+    gcp_private_key_path: {{GCP_PRIVATE_KEY_PATH}}
     gcp_ssh_user: root
