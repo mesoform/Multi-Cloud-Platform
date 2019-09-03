@@ -52,13 +52,10 @@ export TERRAFORM=$TERRAFORM
 export TK8S=$TK8S
 export MO=$MO
 
-export $(grep -E -v '^#' "${ENV_PATH}" | xargs)
-
-export MANAGER_NAME="${ENV}-${CLOUD}-${BASE_MANAGER_NAME}"
-export CLUSTER_NAME="${ENV}-${CLOUD}-${BASE_CLUSTER_NAME}"
-export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
-export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
-export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
+#export $(grep -E -v '^#' "${ENV_PATH}" | xargs)
+set -a
+source ${ENV_PATH}
+set +a
 
 ##
 ## Install section
@@ -219,28 +216,42 @@ installDarwinDependencies() {
 ##
 
 renderManagerConfig() {
-    current_cloud=$1
+    local current_cloud=$1
     [[ -z "${current_cloud}" ]] && echo "Manager config: Cloud name is required" && return
     ${MO} "${TEMPLATES_DIR}/${current_cloud}-manager-template.yaml"
 }
 
 renderClusterConfig() {
-    current_cloud=$1
+    local current_cloud=$1
     [[ -z "${current_cloud}" ]] && echo "Cluster config: Cloud name is required" && return
     ${MO} "${TEMPLATES_DIR}/${current_cloud}-cluster-template.yaml"
 }
 
 renderNodeConfig() {
-    current_cloud=$1
+    local current_cloud=$1
     [[ -z "${current_cloud}" ]] && echo "Node config: Cloud name is required" && return
     ${MO} "${TEMPLATES_DIR}/${current_cloud}-node-template.yaml"
 }
 
 generateConfiguration() {
-  generateManagerConf "gcp" > \
-    "${CONFIG_DIR}/${ENV}/${ENV}-${CLOUD}-${BASE_MANAGER_NAME}.yaml"
-  generateClusterConf "gcp" > \
-    "${CONFIG_DIR}/${ENV}/${ENV}-${CLOUD}-${BASE_CLUSTER_NAME}.yaml"
+    local current_cloud=$1
+    [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && return
+
+    export MANAGER_NAME="${ENV}-${current_cloud}-${BASE_MANAGER_NAME}"
+    renderManagerConfig "${current_cloud}" > \
+      "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
+
+
+    for cln in $(echo "${BASE_CLUSTER_NAMES}")
+    do
+      echo "${cln}"
+      export CLUSTER_NAME="${ENV}-${current_cloud}-${cln}"
+      export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
+      export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
+      export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
+      renderClusterConfig "${current_cloud}" > "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${cln}.yaml"
+    done
+
 }
 
 installDependencies
