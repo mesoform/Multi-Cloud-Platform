@@ -61,32 +61,10 @@ GET_MANAGER_CONFIG=config/get-manager.yaml
 
 runSetup() {
   case "${OPTION_1}" in
-    aws)
-      MANAGER_CONFIG=${AWS_MANAGER}
-      CLUSTER_CONFIG=${AWS_CLUSTER}
-      setupManager
+    aws|gcp|all)
+      setupManager "${OPTION_1}"
       sleep 5
-      setupCluster
-      ;;
-
-    gcp)
-      MANAGER_CONFIG=${GCP_MANAGER}
-      CLUSTER_CONFIG=${GCP_CLUSTER}
-      setupManager
-      sleep 5
-      setupCluster
-      ;;
-
-    all)
-      MANAGER_CONFIG=${GCP_MANAGER}
-      CLUSTER_CONFIG=${GCP_CLUSTER}
-      setupManager
-      sleep 5
-      setupCluster
-
-      sleep 5
-      CLUSTER_CONFIG=${AWS_CLUSTER}
-      setupCluster
+      setupCluster "${OPTION_1}"
       ;;
 
     *)
@@ -95,7 +73,7 @@ runSetup() {
   esac
 
   # Getting info about created manager
-  ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+#  ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
 }
 
 runDestroy() {
@@ -125,19 +103,43 @@ runAdd() {
 }
 
 setupManager() {
+    local current_cloud=$1
+    [[ -z "${current_cloud}" ]] && echo "Setup manager: Cloud name is required" && return
+
+    # Select cloud for manager
+    [[ "${current_cloud}" == "all" ]] && current_cloud="${DEFAULT_CLOUD}"
+
     echo ""
     echo "Creating manager"
     echo ""
 
     echo "Triton Kubernetes version: $(${TK8S} version)"
-    ${TK8S} create manager --non-interactive --config "${SCRIPT_DIR}/${MANAGER_CONFIG}"
+    echo "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
+    ${TK8S} create manager --non-interactive \
+      --config "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
 }
 
 setupCluster() {
+    local current_cloud=$1
+    [[ -z "${current_cloud}" ]] && echo "Setup cluster: Cloud name is required" && return
+
+    # Select cloud for cluster
+    [[ "${current_cloud}" == "all" ]] && current_cloud="*"
+
     echo ""
-    echo "Creating cluster"
+    echo "Creating cluster(s)"
     echo ""
-    ${TK8S} create cluster --non-interactive --config "${SCRIPT_DIR}/${CLUSTER_CONFIG}"
+
+    for cln in $(echo "${BASE_CLUSTER_NAMES}")
+    do
+      for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-"${current_cloud}"-"${cln}".yaml
+      do
+        echo "Config: ${cnf}"
+        ${TK8S} create cluster --non-interactive --config "${cnf}"
+        sleep 5
+      done
+    done
+
 }
 
 addNode() {
@@ -167,9 +169,13 @@ function destroyManager() {
     echo ""
 
     echo "Triton Kubernetes version: $(${TK8S} version)"
-    ${TK8S} destroy manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
-}
+    export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+    ${MO} "${TEMPLATES_DIR}/get-manager-template.yaml" > \
+      "${CONFIG_DIR}/${ENV}/${ENV}-get-manager.yaml"
 
+    ${TK8S} destroy manager --non-interactive \
+      --config "${CONFIG_DIR}/${ENV}/${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}.yaml"
+}
 
 case "${COMMAND}" in
   setup)

@@ -48,13 +48,14 @@ export SOURCE_REF=master
 # Export environment vars
 export ENV=$ENV
 export CONFIG_DIR=$CONFIG_DIR
+export TEMPLATES_DIR=$TEMPLATES_DIR
 export TERRAFORM=$TERRAFORM
 export TK8S=$TK8S
 export MO=$MO
 
 #export $(grep -E -v '^#' "${ENV_PATH}" | xargs)
 set -a
-source ${ENV_PATH}
+source "${ENV_PATH}"
 set +a
 
 ##
@@ -244,7 +245,6 @@ generateConfiguration() {
 
     for cln in $(echo "${BASE_CLUSTER_NAMES}")
     do
-      echo "${cln}"
       export CLUSTER_NAME="${ENV}-${current_cloud}-${cln}"
       export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
       export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"

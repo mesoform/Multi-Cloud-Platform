@@ -14,7 +14,7 @@ k8s_registry_password: ""
 gcp_path_to_credentials: {{GCP_PATH_TO_CREDENTIALS}}
 gcp_compute_region: us-east1
 nodes:
-  - node_count: 1
+  - node_count: {{ETCD_NODE_COUNT}}
     rancher_host_label: etcd
     hostname: {{ETCD_NODE_NAME}}
     gcp_instance_zone: us-east1-b
@@ -23,7 +23,7 @@ nodes:
     gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
     gcp_private_key_path: {{GCP_PRIVATE_KEY_PATH}}
     gcp_ssh_user: root
-  - node_count: 1
+  - node_count: {{CONTROL_NODE_COUNT}}
     rancher_host_label: control
     hostname: {{CONTROL_NODE_NAME}}
     gcp_instance_zone: us-east1-b
@@ -32,7 +32,7 @@ nodes:
     gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
     gcp_private_key_path: {{GCP_PRIVATE_KEY_PATH}}
     gcp_ssh_user: root
-  - node_count: 2
+  - node_count: {{WORKER_NODE_COUNT}}
     rancher_host_label: worker
     hostname: {{WORKER_NODE_NAME}}
     gcp_instance_zone: us-east1-b
