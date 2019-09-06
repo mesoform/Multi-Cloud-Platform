@@ -12,7 +12,7 @@ rancher_admin_password: {{RANCHER_ADMIN_PASSWORD}}
 # set AWS access and secret keys
 aws_access_key: {{AWS_ACCESS_KEY}}
 aws_secret_key: {{AWS_SECRET_KEY}}
-aws_region: us-east-2
+aws_region: eu-west-2
 aws_vpc_cidr: 10.0.0.0/16
 aws_subnet_cidr: 10.0.2.0/24
 aws_public_key_path: {{AWS_PUBLIC_KEY_PATH}}

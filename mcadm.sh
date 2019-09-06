@@ -49,15 +49,7 @@ OPTION_2=$1
 
 set -u
 
-AWS_MANAGER=config/aws/aws-manager.yaml
-AWS_CLUSTER=config/aws/aws-cluster.yaml
 AWS_NODE=config/aws/aws-node.yaml
-
-GCP_MANAGER=config/gcp/gcp-manager.yaml
-GCP_CLUSTER=config/gcp/gcp-cluster.yaml
-GCP_NODE=config/gcp/gcp-node.yaml
-
-GET_MANAGER_CONFIG=config/get-manager.yaml
 
 runSetup() {
   case "${OPTION_1}" in
@@ -73,7 +65,11 @@ runSetup() {
   esac
 
   # Getting info about created manager
-#  ${TK8S} get manager --non-interactive --config "${SCRIPT_DIR}/${GET_MANAGER_CONFIG}"
+  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" > \
+    "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+  ${TK8S} get manager --non-interactive \
+    --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
 }
 
 runDestroy() {
@@ -114,7 +110,7 @@ setupManager() {
     echo ""
 
     echo "Triton Kubernetes version: $(${TK8S} version)"
-    echo "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
+    echo ""
     ${TK8S} create manager --non-interactive \
       --config "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
 }
@@ -134,7 +130,6 @@ setupCluster() {
     do
       for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-"${current_cloud}"-"${cln}".yaml
       do
-        echo "Config: ${cnf}"
         ${TK8S} create cluster --non-interactive --config "${cnf}"
         sleep 5
       done
@@ -170,11 +165,11 @@ function destroyManager() {
 
     echo "Triton Kubernetes version: $(${TK8S} version)"
     export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-    ${MO} "${TEMPLATES_DIR}/get-manager-template.yaml" > \
-      "${CONFIG_DIR}/${ENV}/${ENV}-get-manager.yaml"
+    ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" > \
+      "${CONFIG_DIR}/${ENV}/manager-info.yaml"
 
     ${TK8S} destroy manager --non-interactive \
-      --config "${CONFIG_DIR}/${ENV}/${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}.yaml"
+      --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
 }
 
 case "${COMMAND}" in
