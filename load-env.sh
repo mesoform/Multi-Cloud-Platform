@@ -84,6 +84,12 @@ installLinuxDependencies() {
     echo "Getting jq ..."
     sudo apt-get install -y jq
 
+    # Install YAML processor
+    echo "Getting yq ..."
+    add-apt-repository -y ppa:rmescandon/yq
+    apt-get update
+    apt-get install -y yq
+
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
         echo ""
@@ -148,6 +154,10 @@ installDarwinDependencies() {
     # Install JSON processor
     echo "Getting jq ..."
     brew install jq
+
+    # Install YAML processor
+    echo "Getting yq ..."
+    brew install yq
 
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
