@@ -1,4 +1,4 @@
-# This config file will create an HA cluster on Joyent Cloud (Triton) attached to triton-ha Cluster Manager
+# This config file will create a cluster on GCP
 cluster_manager: {{MANAGER_NAME}}
 backend_provider: local
 name: {{CLUSTER_NAME}}
@@ -12,12 +12,12 @@ k8s_registry: ""
 k8s_registry_username: ""
 k8s_registry_password: ""
 gcp_path_to_credentials: {{GCP_PATH_TO_CREDENTIALS}}
-gcp_compute_region: us-east1
+gcp_compute_region: europe-west2
 nodes:
   - node_count: {{ETCD_NODE_COUNT}}
     rancher_host_label: etcd
     hostname: {{ETCD_NODE_NAME}}
-    gcp_instance_zone: us-east1-b
+    gcp_instance_zone: europe-west2-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
     gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
@@ -26,7 +26,7 @@ nodes:
   - node_count: {{CONTROL_NODE_COUNT}}
     rancher_host_label: control
     hostname: {{CONTROL_NODE_NAME}}
-    gcp_instance_zone: us-east1-b
+    gcp_instance_zone: europe-west2-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
     gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}
@@ -35,7 +35,7 @@ nodes:
   - node_count: {{WORKER_NODE_COUNT}}
     rancher_host_label: worker
     hostname: {{WORKER_NODE_NAME}}
-    gcp_instance_zone: us-east1-b
+    gcp_instance_zone: europe-west2-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
     gcp_public_key_path: {{GCP_PUBLIC_KEY_PATH}}

@@ -1,6 +1,7 @@
+# This config file will create a node on AWS
 cluster_manager: {{MANAGER_NAME}}
 backend_provider: local
-cluster_name: {{CLUSTER_NAME}}
+name: {{CLUSTER_NAME}}
 cluster_cloud_provider: aws
 k8s_version: v1.13.4-rancher1-1
 k8s_network_provider: calico
@@ -10,6 +11,7 @@ private_registry_password: ""
 k8s_registry: ""
 k8s_registry_username: ""
 k8s_registry_password: ""
+# set AWS access and secret keys
 aws_access_key: {{AWS_ACCESS_KEY}}
 aws_secret_key: {{AWS_SECRET_KEY}}
 aws_region: eu-west-2
@@ -20,10 +22,11 @@ aws_private_key_path: {{AWS_PRIVATE_KEY_PATH}}
 aws_key_name: triton-kubernetes_public_key_02
 ebs_volume_device_name: "/dev/sdf"
 ebs_volume_mount_path: "/mnt/triton-kubernetes"
-ebs_volume_type: "gp2"
-node_count: {{WORKER_NODE_COUNT}}
-rancher_host_label: worker
-hostname: {{WORKER_NODE_NAME}}
+ebs_volume_type: gp2
+# chose the OS distributive and specify 'aws_ami_id' for each node
+node_count: {{NODE_COUNT}}
+rancher_host_label: {{NODE_TYPE}}
+hostname: {{NODE_NAME}}
 aws_ami_id: ami-04606ba5d5fb731cc
 aws_instance_type: t2.small
 ebs_volume_iops: 100

@@ -58,6 +58,9 @@ set -a
 source "${ENV_PATH}"
 set +a
 
+# Load functions
+source "${SCRIPT_DIR}/functions.sh"
+
 ##
 ## Install section
 ##
@@ -220,48 +223,6 @@ installDarwinDependencies() {
         echo "Mustache binary for $OS installed"
         echo ""
     fi
-}
-
-##
-## Configuration
-##
-
-renderManagerConfig() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Manager config: Cloud name is required" && return
-    ${MO} "${TEMPLATES_DIR}/${current_cloud}-manager-template.yaml"
-}
-
-renderClusterConfig() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Cluster config: Cloud name is required" && return
-    ${MO} "${TEMPLATES_DIR}/${current_cloud}-cluster-template.yaml"
-}
-
-renderNodeConfig() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Node config: Cloud name is required" && return
-    ${MO} "${TEMPLATES_DIR}/${current_cloud}-node-template.yaml"
-}
-
-generateConfiguration() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && return
-
-    export MANAGER_NAME="${ENV}-${current_cloud}-${BASE_MANAGER_NAME}"
-    renderManagerConfig "${current_cloud}" > \
-      "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
-
-
-    for cln in $(echo "${BASE_CLUSTER_NAMES}")
-    do
-      export CLUSTER_NAME="${ENV}-${current_cloud}-${cln}"
-      export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
-      export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
-      export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
-      renderClusterConfig "${current_cloud}" > "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${cln}.yaml"
-    done
-
 }
 
 installDependencies

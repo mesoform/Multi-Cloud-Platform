@@ -24,7 +24,6 @@ ebs_volume_device_name: "/dev/sdf"
 ebs_volume_mount_path: "/mnt/triton-kubernetes"
 ebs_volume_type: gp2
 # chose the OS distributive and specify 'aws_ami_id' for each node
-# ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-04606ba5d5fb731cc
 nodes:
   - node_count: {{ETCD_NODE_COUNT}}
     rancher_host_label: etcd
