@@ -19,6 +19,6 @@ aws_public_key_path: {{AWS_PUBLIC_KEY_PATH}}
 aws_private_key_path: {{AWS_PRIVATE_KEY_PATH}}
 aws_key_name: triton-kubernetes_public_key_01
 aws_ssh_user: ubuntu
-# ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-0510c89f1a2691cf2
-aws_ami_id: ami-0510c89f1a2691cf2
+# ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-04606ba5d5fb731cc
+aws_ami_id: ami-04606ba5d5fb731cc
 aws_instance_type: t2.small

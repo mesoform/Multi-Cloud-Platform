@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
 set -o pipefail
 
 help() {
@@ -8,23 +7,30 @@ help() {
    echo ""
    echo "Commands:"
    echo "  setup      Setup multi-cloud Kubernetes"
-   echo "  destroy    Destroy cluster manager and all associated clouds"
+   echo "  get        Get information about manager or cluster"
    echo "  add        Adding instances for existing cluster"
+   echo "  destroy    Destroy cluster manager and all associated clouds"
    echo ""
-   echo "Setup options:"
+   echo ""
+   echo "Setup command options:"
    echo "  aws        Setup cluster namager and Kubernetes cluster on AWS"
    echo "  gcp        Setup cluster namager and Kubernetes cluster on Google cloud"
    echo "  all        Setup cluster namager and Kubernetes cluster on all supported clouds"
    echo ""
-   echo "Destroy options:"
-   echo "  manager    Destroy current manager and associated clusters"
+   echo "Get command options:"
+   echo "  manager                      Get information about current manager"
+   echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config>"
    echo ""
-   echo "Add options:"
-   echo " node        Add node to current cluster"
+   echo "Add command options:"
+   echo "  cluster <cloud> <name>      Add cluster for default manager, with name: ENV-<cloud>-<name>"
+   echo "  enode   <cluster_config>    Add etcd node to cluster, identified by <cluster_config>"
+   echo "  cnode   <cluster_config>    Add control node to cluster, identified by <cluster_config>"
+   echo "  wnode   <cluster_config>    Add worker node to cluster, identified by <cluster_config>"
    echo ""
-   echo "Add node options:"
-   echo "  aws        Create node for cluster on AWS"
-   echo "  gcp        Create node for cluster on Google cloud"
+   echo "Destroy command options:"
+   echo "  manager                      Destroy current manager and associated clusters"
+   echo "  cluster <cluster_config>     Destroy cluster, identified by <cluster_config>"
+   echo "  node    <cluster_config>     Select and destroy node in cluster, identified by <cluster_config>"
    echo ""
 }
 
@@ -32,6 +38,8 @@ SCRIPT_NAME=$0
 
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "${SCRIPT_DIR}/load-env.sh" "${ENV}"
 
 COMMAND=$1
 [[ -z "${COMMAND}" ]] && help && exit 1
@@ -42,14 +50,21 @@ OPTION_1=$1
 shift
 
 OPTION_2=$1
-[[ -z "${OPTION_2}" ]]
+shift
+
+OPTION_3=$1
 
 # Verify whether envronment is selected
 [[ -z "${ENV}" ]] && echo "No envronment is selected. Run: source load-env.sh <env_name>" && exit 1
 
+set -e
 set -u
 
 AWS_NODE=config/aws/aws-node.yaml
+
+# ####################################################
+# Command Runners
+# ####################################################
 
 runSetup() {
   case "${OPTION_1}" in
@@ -65,11 +80,47 @@ runSetup() {
   esac
 
   # Getting info about created manager
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" > \
-    "${CONFIG_DIR}/${ENV}/manager-info.yaml"
-  ${TK8S} get manager --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+  getManager
+}
+
+runGet() {
+  case "${OPTION_1}" in
+    manager)
+      getManager
+      ;;
+
+    cluster)
+      getCluster "${OPTION_2}"
+      ;;
+
+    *)
+      help && exit 1
+      ;;
+  esac
+}
+
+runAdd() {
+  case "${OPTION_1}" in
+    cluster)
+      addCluster "${OPTION_2}" "${OPTION_3}"
+      ;;
+
+    enode)
+      addEtcdNode
+      ;;
+
+    cnode)
+      addControlNode
+      ;;
+
+    wnode)
+      addWokerNode
+      ;;
+
+    *)
+      help && exit 1
+      ;;
+  esac
 }
 
 runDestroy() {
@@ -78,17 +129,12 @@ runDestroy() {
       destroyManager
       ;;
 
-    *)
-      help && exit 1
+    cluster)
+      destroyCluster "${OPTION_2}"
       ;;
-  esac
 
-}
-
-runAdd() {
-  case "${OPTION_1}" in
     node)
-      addNode
+      destroyNode "${OPTION_2}"
       ;;
 
     *)
@@ -97,6 +143,12 @@ runAdd() {
   esac
 
 }
+
+# ####################################################
+# Commands
+# ####################################################
+
+# :::::::::: Setup functions
 
 setupManager() {
     local current_cloud=$1
@@ -128,35 +180,129 @@ setupCluster() {
 
     for cln in $(echo "${BASE_CLUSTER_NAMES}")
     do
-      for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-"${current_cloud}"-"${cln}".yaml
+      for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-${current_cloud}-"${cln}".yaml
       do
         ${TK8S} create cluster --non-interactive --config "${cnf}"
         sleep 5
       done
     done
+}
+
+# :::::::::: Get information functions
+
+getManager() {
+  # Getting info about created manager
+  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" > \
+    "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+  ${TK8S} get manager --non-interactive \
+    --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+}
+
+getCluster() {
+    local cluster_config=$1
+    [[ ! -e "${cluster_config}" ]] && echo "Get cluster: Config file is required" && return
+
+    echo ""
+    echo "Getting information about cluster"
+    echo ""
+
+    echo "Triton Kubernetes version: $(${TK8S} version)"
+    export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+    export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+    ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" > \
+      "${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+
+    ${TK8S} get cluster --non-interactive \
+      --config "${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+}
+
+# :::::::::: Add functions
+
+addCluster() {
+    local current_cloud=$1
+    [[ -z "${current_cloud}" ]] && echo "Add cluster: Cloud name is required" && return
+
+    local cluster_name=$2
+    [[ -z "${cluster_name}" ]] && echo "Add cluster: Cluster name is required" && return
+
+    local cloud_list=()
+    # Select cloud for cluster
+    case "${current_cloud}" in
+      aws|gcp)
+        cloud_list=("${current_cloud}")
+        ;;
+
+      all)
+        cloud_list=("aws" "gcp")
+        ;;
+
+      *)
+        help && exit 1
+        ;;
+    esac
+
+    echo ""
+    echo "Adding cluster(s)"
+    echo ""
+
+    for cld in "${cloud_list[@]}"
+    do
+      echo "${cld}"
+      export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+      export CLUSTER_NAME="${ENV}-${cld}-${cluster_name}"
+      export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
+      export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
+      export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
+      renderClusterConfig "${cld}" > "${CONFIG_DIR}/${ENV}/${ENV}-${cld}-${cluster_name}.yaml"
+      ${TK8S} create cluster --non-interactive \
+        --config "${CONFIG_DIR}/${ENV}/${ENV}-${cld}-${cluster_name}.yaml"
+      sleep 5
+    done
+}
+
+addEtcdNode() {
+    echo ""
+    echo "Adding etcd node"
+    echo ""
+}
+
+addControlNode() {
+    echo ""
+    echo "Adding control node"
+    echo ""
 
 }
 
-addNode() {
-  echo ""
-  echo "Adding node"
-  echo ""
+addWokerNode() {
+    echo ""
+    echo "Adding worker node"
+    echo ""
 
-  case "${OPTION_2}" in
-    aws)
-      NODE_CONFIG=${AWS_NODE}
-      ;;
-
-    gcp)
-      NODE_CONFIG=${GCP_NODE}
-      ;;
-
-    *)
-      help && exit 1
-      ;;
-  esac
-  ${TK8S} create node --non-interactive --config "${SCRIPT_DIR}/${NODE_CONFIG}"
 }
+
+#addNode() {
+#  echo ""
+#  echo "Adding node"
+#  echo ""
+#
+#  case "${OPTION_2}" in
+#    aws)
+#      NODE_CONFIG=${AWS_NODE}
+#      ;;
+#
+#    gcp)
+#      NODE_CONFIG=${GCP_NODE}
+#      ;;
+#
+#    *)
+#      help && exit 1
+#      ;;
+#  esac
+#  ${TK8S} create node --non-interactive --config "${SCRIPT_DIR}/${NODE_CONFIG}"
+#}
+
+# :::::::::: Destroy functions
 
 function destroyManager() {
     echo ""
@@ -172,17 +318,61 @@ function destroyManager() {
       --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
 }
 
+function destroyCluster() {
+    local cluster_config=$1
+    [[ ! -e "${cluster_config}" ]] && echo "Destroy cluster: Config file is required" && return
+
+    echo ""
+    echo "Destroing cluster"
+    echo ""
+
+    echo "Triton Kubernetes version: $(${TK8S} version)"
+    export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+    export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+    ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" > \
+      "${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+
+    ${TK8S} destroy cluster --non-interactive \
+      --config "${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+}
+
+function destroyNode() {
+    local cluster_config=$1
+    [[ ! -e "${cluster_config}" ]] && echo "Destroy node: Config file is required" && return
+
+    echo ""
+    echo "Destroing node"
+    echo ""
+
+    echo "Triton Kubernetes version: $(${TK8S} version)"
+    export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+    export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+    ${MO} "${TEMPLATES_DIR}/node-info-template.yaml" > \
+      "${CONFIG_DIR}/${ENV}/node-info.yaml"
+
+    ${TK8S} destroy node \
+      --config "${CONFIG_DIR}/${ENV}/node-info.yaml"
+}
+
+# ####################################################
+# Command selector
+# ####################################################
+
 case "${COMMAND}" in
   setup)
     runSetup
     ;;
 
-  destroy)
-    runDestroy
+  get)
+    runGet
     ;;
 
   add)
     runAdd
+    ;;
+
+  destroy)
+    runDestroy
     ;;
 
   *)

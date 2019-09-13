@@ -1,0 +1,4 @@
+# This config file will get information about Cluster
+backend_provider: local
+cluster_manager: {{MANAGER_NAME}}
+name: {{CLUSTER_NAME}}

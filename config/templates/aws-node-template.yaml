@@ -24,7 +24,7 @@ ebs_volume_type: "gp2"
 node_count: {{WORKER_NODE_COUNT}}
 rancher_host_label: worker
 hostname: {{WORKER_NODE_NAME}}
-aws_ami_id: ami-0510c89f1a2691cf2
+aws_ami_id: ami-04606ba5d5fb731cc
 aws_instance_type: t2.small
 ebs_volume_iops: 100
 ebs_volume_size: 10
