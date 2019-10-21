@@ -90,7 +90,7 @@ installLinuxDependencies() {
     # Install YAML processor
     echo "Getting yq ..."
     sudo add-apt-repository -y ppa:rmescandon/yq
-    apt-get update
+    sudo apt-get update
     sudo apt-get install -y yq
 
     # Install Terraform

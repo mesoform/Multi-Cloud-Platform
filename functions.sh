@@ -26,6 +26,7 @@ generateConfiguration() {
     local current_cloud=$1
     [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && return
 
+    set -a
     local cloud_list=()
     # Select cloud
     case "${current_cloud}" in
@@ -35,7 +36,7 @@ generateConfiguration() {
 
     all)
       cloud_list=("aws" "gcp")
-      current_cloud="${DEFAULT_CLOUD}"
+      current_cloud="${MCP_DEFAULT_CLOUD}"
       ;;
 
     *)
@@ -43,19 +44,29 @@ generateConfiguration() {
       ;;
     esac
 
-    export MANAGER_NAME="${ENV}-${current_cloud}-${BASE_MANAGER_NAME}"
+    echo "DEBUG: manager name"
+    export MCP_MANAGER_NAME="${ENV}-${current_cloud}-${MCP_BASE_MANAGER_NAME}"
+    if [ "${current_cloud}" = "aws" ]; then
+      key_name_suffix=$(date +%s | md5 | head -c 8)
+      export MCP_AWS_MANAGER_KEY_NAME="${ENV}-${MCP_BASE_MANAGER_NAME}_public_key_${key_name_suffix}"
+    fi
+    echo "DEBUG: render manager config"
     renderManagerConfig "${current_cloud}" > \
-      "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
+      "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${MCP_BASE_MANAGER_NAME}.yaml"
 
 
-    for cln in $(echo "${BASE_CLUSTER_NAMES}")
+    for cln in $(echo "${MCP_BASE_CLUSTER_NAMES}")
     do
       for cloud_in_list in "${cloud_list[@]}"
       do
-        export CLUSTER_NAME="${ENV}-${cloud_in_list}-${cln}"
-        export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
-        export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
-        export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
+        export MCP_CLUSTER_NAME="${ENV}-${cloud_in_list}-${cln}"
+        if [ "${cloud_in_list}" = "aws" ]; then
+          key_name_suffix=$(date +%s | md5 | head -c 8)
+          export MCP_AWS_CLUSTER_KEY_NAME="${MCP_CLUSTER_NAME}_public_key_${key_name_suffix}"
+        fi
+        export MCP_ETCD_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_ETCD_NODE_NAME}"
+        export MCP_CONTROL_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_CONTROL_NODE_NAME}"
+        export MCP_WORKER_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_WORKER_NODE_NAME}"
         renderClusterConfig "${cloud_in_list}" > "${CONFIG_DIR}/${ENV}/${ENV}-${cloud_in_list}-${cln}.yaml"
       done
     done

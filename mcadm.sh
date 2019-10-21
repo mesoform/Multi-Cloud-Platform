@@ -155,7 +155,7 @@ setupManager() {
   [[ -z "${current_cloud}" ]] && echo "Setup manager: Cloud name is required" && return
 
   # Select cloud for manager
-  [[ "${current_cloud}" == "all" ]] && current_cloud="${DEFAULT_CLOUD}"
+  [[ "${current_cloud}" == "all" ]] && current_cloud="${MCP_DEFAULT_CLOUD}"
 
   echo ""
   echo "Creating manager"
@@ -164,7 +164,7 @@ setupManager() {
   echo "Triton Kubernetes version: $(${TK8S} version)"
   echo ""
   ${TK8S} create manager --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
+    --config "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${MCP_BASE_MANAGER_NAME}.yaml"
 }
 
 setupCluster() {
@@ -178,7 +178,7 @@ setupCluster() {
   echo "Creating cluster(s)"
   echo ""
 
-  for cln in $(echo "${BASE_CLUSTER_NAMES}"); do
+  for cln in $(echo "${MCP_BASE_CLUSTER_NAMES}"); do
     for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-${current_cloud}-"${cln}".yaml; do
       ${TK8S} create cluster --non-interactive --config "${cnf}"
       sleep 5
@@ -190,7 +190,7 @@ setupCluster() {
 
 getManager() {
   # Getting info about created manager
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${ENV}/manager-info.yaml"
   ${TK8S} get manager --non-interactive \
     --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
@@ -205,8 +205,8 @@ getCluster() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-  export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${ENV}/cluster-info.yaml"
 
   ${TK8S} get cluster --non-interactive \
@@ -243,11 +243,15 @@ addCluster() {
   echo ""
 
   for cld in "${cloud_list[@]}"; do
-    export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-    export CLUSTER_NAME="${ENV}-${cld}-${cluster_name}"
-    export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
-    export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
-    export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
+    export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+    export MCP_CLUSTER_NAME="${ENV}-${cld}-${cluster_name}"
+    export MCP_ETCD_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_ETCD_NODE_NAME}"
+    export MCP_CONTROL_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_CONTROL_NODE_NAME}"
+    export MCP_WORKER_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_WORKER_NODE_NAME}"
+    if [ "${cld}" = "aws" ]; then
+      key_name_suffix=$(date +%s | md5 | head -c 8)
+      export MCP_AWS_CLUSTER_KEY_NAME="${MCP_CLUSTER_NAME}_public_key_${key_name_suffix}"
+    fi
     renderClusterConfig "${cld}" >"${CONFIG_DIR}/${ENV}/${ENV}-${cld}-${cluster_name}.yaml"
     ${TK8S} create cluster --non-interactive \
       --config "${CONFIG_DIR}/${ENV}/${ENV}-${cld}-${cluster_name}.yaml"
@@ -256,23 +260,23 @@ addCluster() {
 }
 
 addEtcdNode() {
-  export NODE_TYPE="etcd"
-  export BASE_NODE_NAME="${BASE_ETCD_NODE_NAME}"
-  export NODE_COUNT=${ETCD_NODE_COUNT}
+  export MCP_NODE_TYPE="etcd"
+  export MCP_BASE_NODE_NAME="${MCP_BASE_ETCD_NODE_NAME}"
+  export MCP_NODE_COUNT=1 #${MCP_ETCD_NODE_COUNT}
   addNode "$1"
 }
 
 addControlNode() {
-  export NODE_TYPE="control"
-  export BASE_NODE_NAME="${BASE_CONTROL_NODE_NAME}"
-  export NODE_COUNT=${CONTROL_NODE_COUNT}
+  export MCP_NODE_TYPE="control"
+  export MCP_BASE_NODE_NAME="${MCP_BASE_CONTROL_NODE_NAME}"
+  export MCP_NODE_COUNT=1 #${MCP_CONTROL_NODE_COUNT}
   addNode "$1"
 }
 
 addWokerNode() {
-  export NODE_TYPE="worker"
-  export BASE_NODE_NAME="${BASE_WORKER_NODE_NAME}"
-  export NODE_COUNT=${WORKER_NODE_COUNT}
+  export MCP_NODE_TYPE="worker"
+  export MCP_BASE_NODE_NAME="${MCP_BASE_WORKER_NODE_NAME}"
+  export MCP_NODE_COUNT=1 #${MCP_WORKER_NODE_COUNT}
   addNode "$1"
 }
 
@@ -281,20 +285,20 @@ addNode() {
   [[ ! -e "${cluster_config}" ]] && echo "Add node: Cluster config file is required" && return
 
   echo ""
-  echo "Adding ${NODE_TYPE} node"
+  echo "Adding ${MCP_NODE_TYPE} node"
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-  export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
-  export NODE_NAME="${CLUSTER_NAME}-${BASE_NODE_NAME}"
+  export MCP_MANAGER_NAME=$(yq r "${cluster_config}" 'cluster_manager')
+  export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+  export MCP_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_NODE_NAME}"
   local current_cloud=$(yq r "${cluster_config}" 'cluster_cloud_provider')
 
   renderNodeConfig "${current_cloud}" > \
-    "${CONFIG_DIR}/${ENV}/${NODE_NAME}.yaml"
+    "${CONFIG_DIR}/${ENV}/${MCP_NODE_NAME}.yaml"
 
   ${TK8S} create node --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/${NODE_NAME}.yaml"
+    --config "${CONFIG_DIR}/${ENV}/${MCP_NODE_NAME}.yaml"
 }
 
 # :::::::::: Destroy functions
@@ -305,7 +309,7 @@ function destroyManager() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${ENV}/manager-info.yaml"
 
   ${TK8S} destroy manager --non-interactive \
@@ -321,8 +325,8 @@ function destroyCluster() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-  export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${ENV}/cluster-info.yaml"
 
   ${TK8S} destroy cluster --non-interactive \
@@ -338,8 +342,8 @@ function destroyNode() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MANAGER_NAME="${ENV}-${DEFAULT_CLOUD}-${BASE_MANAGER_NAME}"
-  export CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
+  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/node-info-template.yaml" >"${CONFIG_DIR}/${ENV}/node-info.yaml"
 
   ${TK8S} destroy node \
