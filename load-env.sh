@@ -53,13 +53,10 @@ export TERRAFORM=$TERRAFORM
 export TK8S=$TK8S
 export MO=$MO
 
-#export $(grep -E -v '^#' "${ENV_PATH}" | xargs)
-set -a
-source "${ENV_PATH}"
-set +a
-
 # Load functions
 source "${SCRIPT_DIR}/functions.sh"
+
+source_environment
 
 ##
 ## Install section

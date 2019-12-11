@@ -57,6 +57,8 @@ OPTION_3=$1
 # Verify whether envronment is selected
 [[ -z "${ENV}" ]] && echo "No envronment is selected. Run: source load-env.sh <env_name>" && exit 1
 
+source_environment
+
 set -e
 set -u
 

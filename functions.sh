@@ -4,6 +4,13 @@
 ## Configuration
 ##
 
+source_environment() {
+  echo "Source Environment"
+  set -a
+  source "${ENV_PATH}"
+  set +a
+}
+
 renderManagerConfig() {
     local current_cloud=$1
     [[ -z "${current_cloud}" ]] && echo "Manager config: Cloud name is required" && return
@@ -23,8 +30,10 @@ renderNodeConfig() {
 }
 
 generateConfiguration() {
+    source_environment
     local current_cloud=$1
     [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && return
+
 
     set -a
     local cloud_list=()
