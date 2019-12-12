@@ -154,11 +154,11 @@ installLinuxDependencies() {
 installDarwinDependencies() {
     # Install JSON processor
     echo "Getting jq ..."
-    brew install jq
+    [[ $(brew list jq) ]] || brew install jq
 
     # Install YAML processor
     echo "Getting yq ..."
-    brew install yq
+    [[ $(brew list yq) ]] || brew install yq
 
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
