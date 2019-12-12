@@ -47,6 +47,7 @@ export SOURCE_REF=master
 
 # Export environment vars
 export ENV=$ENV
+export ENV_PATH=$ENV_PATH
 export CONFIG_DIR=$CONFIG_DIR
 export TEMPLATES_DIR=$TEMPLATES_DIR
 export TERRAFORM=$TERRAFORM
