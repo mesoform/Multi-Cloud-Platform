@@ -15,8 +15,8 @@ k8s_registry_password: ""
 aws_access_key: {{MCP_AWS_ACCESS_KEY}}
 aws_secret_key: {{MCP_AWS_SECRET_KEY}}
 aws_region: eu-west-2
-aws_vpc_cidr: 172.18.0.0/16
-aws_subnet_cidr: 172.18.1.0/24
+aws_vpc_cidr: 172.22.0.0/16
+aws_subnet_cidr: 172.22.1.0/24
 aws_public_key_path: {{MCP_AWS_PUBLIC_KEY_PATH}}
 aws_private_key_path: {{MCP_AWS_PRIVATE_KEY_PATH}}
 aws_key_name: {{MCP_AWS_CLUSTER_KEY_NAME}}
