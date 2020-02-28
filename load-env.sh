@@ -98,7 +98,6 @@ installLinuxDependencies() {
         echo ""
 
         cd "${BIN}"
-        #TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
         TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip
         TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
         wget "${TERRAFORM_URL_LIN}"
@@ -118,7 +117,7 @@ installLinuxDependencies() {
         echo ""
 
         cd "${BIN}"
-        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_linux-amd64.zip
+        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_linux-amd64.zip
         TK8S_FILE_LIN="${TK8S_URL_LIN##*/}"
 
         echo "URL: ${TK8S_URL_LIN}"
@@ -190,7 +189,7 @@ installDarwinDependencies() {
         echo ""
 
         cd "${BIN}"
-        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_osx-amd64.zip
+        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_osx-amd64.zip
         TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
 
         echo "URL: ${TK8S_URL_DAR}"
