@@ -47,16 +47,17 @@ export SOURCE_REF=master
 
 # Export environment vars
 export ENV=$ENV
+export ENV_PATH=$ENV_PATH
 export CONFIG_DIR=$CONFIG_DIR
 export TEMPLATES_DIR=$TEMPLATES_DIR
 export TERRAFORM=$TERRAFORM
 export TK8S=$TK8S
 export MO=$MO
 
-#export $(grep -E -v '^#' "${ENV_PATH}" | xargs)
-set -a
-source "${ENV_PATH}"
-set +a
+# Load functions
+source "${SCRIPT_DIR}/functions.sh"
+
+source_environment
 
 ##
 ## Install section
@@ -84,6 +85,12 @@ installLinuxDependencies() {
     echo "Getting jq ..."
     sudo apt-get install -y jq
 
+    # Install YAML processor
+    echo "Getting yq ..."
+    sudo add-apt-repository -y ppa:rmescandon/yq
+    sudo apt-get update
+    sudo apt-get install -y yq
+
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
         echo ""
@@ -91,7 +98,6 @@ installLinuxDependencies() {
         echo ""
 
         cd "${BIN}"
-        #TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
         TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip
         TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
         wget "${TERRAFORM_URL_LIN}"
@@ -111,7 +117,7 @@ installLinuxDependencies() {
         echo ""
 
         cd "${BIN}"
-        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_linux-amd64.zip
+        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_linux-amd64.zip
         TK8S_FILE_LIN="${TK8S_URL_LIN##*/}"
 
         echo "URL: ${TK8S_URL_LIN}"
@@ -147,7 +153,11 @@ installLinuxDependencies() {
 installDarwinDependencies() {
     # Install JSON processor
     echo "Getting jq ..."
-    brew install jq
+    [[ $(brew list jq) ]] || brew install jq
+
+    # Install YAML processor
+    echo "Getting yq ..."
+    [[ $(brew list yq) ]] || brew install yq
 
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
@@ -179,7 +189,7 @@ installDarwinDependencies() {
         echo ""
 
         cd "${BIN}"
-        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.1-mf/triton-kubernetes_0.9.1-mf_osx-amd64.zip
+        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_osx-amd64.zip
         TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
 
         echo "URL: ${TK8S_URL_DAR}"
@@ -210,48 +220,6 @@ installDarwinDependencies() {
         echo "Mustache binary for $OS installed"
         echo ""
     fi
-}
-
-##
-## Configuration
-##
-
-renderManagerConfig() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Manager config: Cloud name is required" && return
-    ${MO} "${TEMPLATES_DIR}/${current_cloud}-manager-template.yaml"
-}
-
-renderClusterConfig() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Cluster config: Cloud name is required" && return
-    ${MO} "${TEMPLATES_DIR}/${current_cloud}-cluster-template.yaml"
-}
-
-renderNodeConfig() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Node config: Cloud name is required" && return
-    ${MO} "${TEMPLATES_DIR}/${current_cloud}-node-template.yaml"
-}
-
-generateConfiguration() {
-    local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && return
-
-    export MANAGER_NAME="${ENV}-${current_cloud}-${BASE_MANAGER_NAME}"
-    renderManagerConfig "${current_cloud}" > \
-      "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${BASE_MANAGER_NAME}.yaml"
-
-
-    for cln in $(echo "${BASE_CLUSTER_NAMES}")
-    do
-      export CLUSTER_NAME="${ENV}-${current_cloud}-${cln}"
-      export ETCD_NODE_NAME="${CLUSTER_NAME}-${BASE_ETCD_NODE_NAME}"
-      export CONTROL_NODE_NAME="${CLUSTER_NAME}-${BASE_CONTROL_NODE_NAME}"
-      export WORKER_NODE_NAME="${CLUSTER_NAME}-${BASE_WORKER_NODE_NAME}"
-      renderClusterConfig "${current_cloud}" > "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${cln}.yaml"
-    done
-
 }
 
 installDependencies

@@ -1,6 +1,6 @@
 # This config file will create a Cluster Manager which will be running on AWS
 backend_provider: local
-name: {{MANAGER_NAME}}
+name: {{MCP_MANAGER_NAME}}
 manager_cloud_provider: aws
 private_registry: ""
 private_registry_username: ""
@@ -8,17 +8,17 @@ private_registry_password: ""
 rancher_server_image: ""
 rancher_agent_image: ""
 # set password for rancher 'admin' user
-rancher_admin_password: {{RANCHER_ADMIN_PASSWORD}}
+rancher_admin_password: {{MCP_RANCHER_ADMIN_PASSWORD}}
 # set AWS access and secret keys
-aws_access_key: {{AWS_ACCESS_KEY}}
-aws_secret_key: {{AWS_SECRET_KEY}}
+aws_access_key: {{MCP_AWS_ACCESS_KEY}}
+aws_secret_key: {{MCP_AWS_SECRET_KEY}}
 aws_region: eu-west-2
 aws_vpc_cidr: 10.0.0.0/16
 aws_subnet_cidr: 10.0.2.0/24
-aws_public_key_path: {{AWS_PUBLIC_KEY_PATH}}
-aws_private_key_path: {{AWS_PRIVATE_KEY_PATH}}
-aws_key_name: triton-kubernetes_public_key_01
+aws_public_key_path: {{MCP_AWS_PUBLIC_KEY_PATH}}
+aws_private_key_path: {{MCP_AWS_PRIVATE_KEY_PATH}}
+aws_key_name: {{MCP_AWS_MANAGER_KEY_NAME}}
 aws_ssh_user: ubuntu
-# ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-0510c89f1a2691cf2
-aws_ami_id: ami-0510c89f1a2691cf2
+# ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-04606ba5d5fb731cc
+aws_ami_id: ami-04606ba5d5fb731cc
 aws_instance_type: t2.small

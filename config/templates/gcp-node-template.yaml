@@ -1,18 +1,25 @@
-# This config file will create a Cluster Manager which will be running on Google Cloud Platform
+# This config file will create a node on GCP cluster
+cluster_manager: {{MCP_MANAGER_NAME}}
 backend_provider: local
-name: {{MCP_MANAGER_NAME}}
-manager_cloud_provider: gcp
+cluster_name: {{MCP_CLUSTER_NAME}}
+cluster_cloud_provider: gcp
+k8s_version: v1.13.4-rancher1-1
+k8s_network_provider: {{MCP_K8S_NETWORK_PROVIDER}}
 private_registry: ""
 private_registry_username: ""
 private_registry_password: ""
-rancher_server_image: ""
-rancher_agent_image: ""
+k8s_registry: ""
+k8s_registry_username: ""
+k8s_registry_password: ""
 gcp_path_to_credentials: {{MCP_GCP_PATH_TO_CREDENTIALS}}
 gcp_compute_region: europe-west2
+# Node info
+node_count: {{MCP_NODE_COUNT}}
+rancher_host_label: {{MCP_NODE_TYPE}}
+hostname: {{MCP_NODE_NAME}}
 gcp_instance_zone: europe-west2-b
 gcp_machine_type: g1-small
 gcp_image: ubuntu-1604-xenial-v20190430
 gcp_public_key_path: {{MCP_GCP_PUBLIC_KEY_PATH}}
 gcp_private_key_path: {{MCP_GCP_PRIVATE_KEY_PATH}}
 gcp_ssh_user: root
-rancher_admin_password: {{MCP_RANCHER_ADMIN_PASSWORD}}

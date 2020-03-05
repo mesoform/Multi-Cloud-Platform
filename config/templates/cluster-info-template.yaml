@@ -1,0 +1,4 @@
+# This config file will get information about Cluster
+backend_provider: local
+cluster_manager: {{MCP_MANAGER_NAME}}
+cluster_name: {{MCP_CLUSTER_NAME}}
