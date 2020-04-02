@@ -29,20 +29,20 @@ nodes:
     rancher_host_label: etcd
     hostname: {{MCP_ETCD_NODE_NAME}}
     aws_ami_id: ami-04606ba5d5fb731cc
-    aws_instance_type: t2.small
+    aws_instance_type: t2.medium
     ebs_volume_iops: 100
     ebs_volume_size: 10
   - node_count: {{MCP_CONTROL_NODE_COUNT}}
     rancher_host_label: control
     hostname: {{MCP_CONTROL_NODE_NAME}}
     aws_ami_id: ami-04606ba5d5fb731cc
-    aws_instance_type: t2.small
+    aws_instance_type: t2.medium
     ebs_volume_iops: 100
     ebs_volume_size: 10
   - node_count: {{MCP_WORKER_NODE_COUNT}}
     rancher_host_label: worker
     hostname: {{MCP_WORKER_NODE_NAME}}
     aws_ami_id: ami-04606ba5d5fb731cc
-    aws_instance_type: t2.small
+    aws_instance_type: t2.medium
     ebs_volume_iops: 100
     ebs_volume_size: 10

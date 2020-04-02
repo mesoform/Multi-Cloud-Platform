@@ -41,6 +41,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${SCRIPT_DIR}/functions.sh"
 
+TERRAFORM_MON="${SCRIPT_DIR}/terraform/monitoring"
+
 COMMAND=$1
 [[ -z "${COMMAND}" ]] && help && exit 1
 shift
@@ -55,7 +57,7 @@ shift
 OPTION_3=$1
 
 # Verify whether envronment is selected
-[[ -z "${ENV}" ]] && echo "No envronment is selected. Run: source load-env.sh <env_name>" && exit 1
+[[ -z "${ENV}" ]] && echo "No environment selected. Run: source load-env.sh <env_name>" && exit 1
 
 source_environment
 
@@ -83,6 +85,9 @@ runSetup() {
 
   # Getting info about created manager
   getManager
+
+  # Zabbix and ELK setup
+  ${SCRIPT_DIR}/monitoring/moniadm.sh setup ${OPTION_1}
 }
 
 runGet() {
@@ -128,6 +133,18 @@ runAdd() {
 runDestroy() {
   case "${OPTION_1}" in
   manager)
+    if [[ -f ${TERRAFORM_MON}/zabbix-elk-aws-only/terraform.tfvars ]]; then
+        echo "AWS"
+        ${SCRIPT_DIR}/monitoring/moniadm.sh destroy aws
+    elif [[ -f ${TERRAFORM_MON}/zabbix-elk-gcp-only/terraform.tfvars ]]; then
+        echo "GCP"
+        ${SCRIPT_DIR}/monitoring/moniadm.sh destroy gcp
+    elif [[ -f ${TERRAFORM_MON}/zabbix-elk-mcp/terraform.tfvars ]]; then
+        echo "ALL"
+        ${SCRIPT_DIR}/monitoring/moniadm.sh destroy all
+    else
+        echo "File terraform.tfvars not found"
+    fi
     destroyManager
     ;;
 
@@ -157,7 +174,7 @@ setupManager() {
   [[ -z "${current_cloud}" ]] && echo "Setup manager: Cloud name is required" && return
 
   # Select cloud for manager
-  [[ "${current_cloud}" == "all" ]] && current_cloud="${MCP_DEFAULT_CLOUD}"
+  [[ "${current_cloud}" == "all" ]] && current_cloud="${MCP_BASE_MANAGER_CLOUD}"
 
   echo ""
   echo "Creating manager"
@@ -180,7 +197,7 @@ setupCluster() {
   echo "Creating cluster(s)"
   echo ""
 
-  for cln in $(echo "${MCP_BASE_CLUSTER_NAMES}"); do
+  for cln in $(echo "${MCP_BASE_CLUSTER_NAME}"); do
     for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-${current_cloud}-"${cln}".yaml; do
       ${TK8S} create cluster --non-interactive --config "${cnf}"
       sleep 5
@@ -192,10 +209,20 @@ setupCluster() {
 
 getManager() {
   # Getting info about created manager
-  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${ENV}/manager-info.yaml"
   ${TK8S} get manager --non-interactive \
     --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+
+  # Generate rancher variables file
+  export RANCHER_ACCESS_KEY=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_access_key)
+  export RANCHER_SECRET_KEY=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_secret_key)
+  export RANCHER_URL=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_url)
+
+  echo "RANCHER_ACCESS_KEY=\"$RANCHER_ACCESS_KEY\"" > ${CONFIG_DIR}/rancher.vars
+  echo "RANCHER_SECRET_KEY=\"$RANCHER_SECRET_KEY\"" >> ${CONFIG_DIR}/rancher.vars
+  echo "RANCHER_URL=\"$RANCHER_URL\"" >> ${CONFIG_DIR}/rancher.vars
+  echo ""
 }
 
 getCluster() {
@@ -207,7 +234,7 @@ getCluster() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${ENV}/cluster-info.yaml"
 
@@ -245,7 +272,7 @@ addCluster() {
   echo ""
 
   for cld in "${cloud_list[@]}"; do
-    export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+    export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
     export MCP_CLUSTER_NAME="${ENV}-${cld}-${cluster_name}"
     export MCP_ETCD_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_ETCD_NODE_NAME}"
     export MCP_CONTROL_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_CONTROL_NODE_NAME}"
@@ -307,15 +334,17 @@ addNode() {
 
 function destroyManager() {
   echo ""
-  echo "Destroing manager"
+  echo "Destroying manager"
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${ENV}/manager-info.yaml"
 
   ${TK8S} destroy manager --non-interactive \
     --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+
+  rm -rf "${CONFIG_DIR:?}/${ENV:?}/"
 }
 
 function destroyCluster() {
@@ -323,11 +352,11 @@ function destroyCluster() {
   [[ ! -e "${cluster_config}" ]] && echo "Destroy cluster: Config file is required" && return
 
   echo ""
-  echo "Destroing cluster"
+  echo "Destroying cluster"
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${ENV}/cluster-info.yaml"
 
@@ -340,11 +369,11 @@ function destroyNode() {
   [[ ! -e "${cluster_config}" ]] && echo "Destroy node: Config file is required" && return
 
   echo ""
-  echo "Destroing node"
+  echo "Destroying node"
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_DEFAULT_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/node-info-template.yaml" >"${CONFIG_DIR}/${ENV}/node-info.yaml"
 
@@ -379,5 +408,5 @@ destroy)
 esac
 
 echo ""
-echo "Done"
+echo "MCP admin process completed: ${COMMAND}"
 echo ""

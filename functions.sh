@@ -45,7 +45,7 @@ generateConfiguration() {
 
     all)
       cloud_list=("aws" "gcp")
-      current_cloud="${MCP_DEFAULT_CLOUD}"
+      current_cloud="${MCP_BASE_MANAGER_CLOUD}"
       ;;
 
     *)
@@ -64,7 +64,7 @@ generateConfiguration() {
       "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${MCP_BASE_MANAGER_NAME}.yaml"
 
 
-    for cln in $(echo "${MCP_BASE_CLUSTER_NAMES}")
+    for cln in $(echo "${MCP_BASE_CLUSTER_NAME}")
     do
       for cloud_in_list in "${cloud_list[@]}"
       do

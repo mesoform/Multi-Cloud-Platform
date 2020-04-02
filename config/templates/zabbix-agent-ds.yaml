@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zabbix-agent
+  labels:
+    tier: monitoring
+    app: zabbix-agent
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      name: mcp-zabbix-agent
+  template:
+    metadata:
+      labels:
+        name: mcp-zabbix-agent
+    spec:
+      containers:
+        - resources:
+            requests:
+              cpu: 0.15
+          securityContext:
+            privileged: true
+          env:
+            - name: ZBX_SERVER_HOST
+              value: "{{ZABBIX_PRIVATE_IP}}"
+          image: zabbix/zabbix-agent:ubuntu-4.2.1
+          ports:
+            - containerPort: 10050
+              hostPort: 10050
+              name: zabbix-agent
+          name: mcp-zabbix-agent
+      tolerations:
+        - key: "node-role.kubernetes.io/controlplane"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "node-role.kubernetes.io/etcd"
+          operator: "Equal"
+          value: "true"
+          effect: "NoExecute"

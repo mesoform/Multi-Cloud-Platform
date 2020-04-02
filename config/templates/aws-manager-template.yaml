@@ -21,4 +21,4 @@ aws_key_name: {{MCP_AWS_MANAGER_KEY_NAME}}
 aws_ssh_user: ubuntu
 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-04606ba5d5fb731cc
 aws_ami_id: ami-04606ba5d5fb731cc
-aws_instance_type: t2.small
+aws_instance_type: t2.large

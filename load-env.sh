@@ -45,6 +45,9 @@ else
 fi
 export SOURCE_REF=master
 
+# Retrieve real public IP address
+REAL_PUBLIC_IP=$(curl ifconfig.co)
+
 # Export environment vars
 export ENV=$ENV
 export ENV_PATH=$ENV_PATH
@@ -53,6 +56,7 @@ export TEMPLATES_DIR=$TEMPLATES_DIR
 export TERRAFORM=$TERRAFORM
 export TK8S=$TK8S
 export MO=$MO
+export REAL_PUBLIC_IP=$REAL_PUBLIC_IP
 
 # Load functions
 source "${SCRIPT_DIR}/functions.sh"
@@ -140,9 +144,9 @@ installLinuxDependencies() {
         echo ""
 
         cd "${BIN}"
-
         curl -sSL https://git.io/get-mo -o mo
         chmod +x mo
+        cd "${SCRIPT_DIR}"
 
         echo ""
         echo "mustache binary for $OS installed"

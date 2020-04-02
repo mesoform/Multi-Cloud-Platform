@@ -1,95 +1,86 @@
-# Multi cloud plaform scripts
+# Multi cloud platform scripts
 
-Multi clund platform contains scripts and configurations to run interactive deployment of Triton Kubernetes solution.
+Multi cloud platform contains scripts and configurations to run interactive deployment of Triton Kubernetes solution on AWS and/or GCP along with Zabbix monitoring and Elastic Stack logging.
 
 ## Quick start guide
 
 ### Prepare to run deployment
 
-Configuration files templates for ```triton-kubernetes``` are located in config directory and grouped by cloud providers.
-First of all create configuration files from templates. To do this open the terminal, go the this repository root and copy templates.
+Clone the `mcp-setup` git repository and make a copy of the `sample.vars` file found under `env` folder giving it an environment name (`dev/test/prod/etc.`)
 
-For AWS
+E.g: `cp samples.vars dev.vars`
 
-```
-cp config/aws/aws-manager-template.yaml config/aws/aws-manager.yaml
-cp config/aws/aws-cluster-template.yaml config/aws/aws-cluster.yaml
+Edit the configuration file and make the appropriate changes relevant to your cloud providers (AWS/GCP): 
 
 ```
 
-For Google Cloud Platform
+# RANCHER
+MCP_BASE_MANAGER_CLOUD=aws          # default cloud provider for rancher manager: aws|gcp
+MCP_BASE_MANAGER_NAME="manager"     # rancher manager name
+MCP_RANCHER_ADMIN_PASSWORD=change   # rancher admin password
 
-```
-cp config/gcp/gcp-manager-template.yaml config/gcp/gcp-manager.yaml
-cp config/gcp/gcp-cluster-template.yaml config/gcp/gcp-cluster.yaml
+# K8S
+MCP_BASE_CLUSTER_NAME="cluster"     # k8s cluster name
+MCP_K8S_NETWORK_PROVIDER="calico"   # k8s network provider: calico|canal|flannel|weave
 
-```
+MCP_BASE_ETCD_NODE_NAME=etcd        # k8s etcd node name
+MCP_BASE_CONTROL_NODE_NAME=control  # k8s control node name
+MCP_BASE_WORKER_NODE_NAME=worker    # k8s worker node name
 
-Make changes in the configuration files according to the description which is present for parameters.
-Draw attention the the following parametes:
+MCP_ETCD_NODE_COUNT=1      # number of etcd nodes per cluster
+MCP_CONTROL_NODE_COUNT=1   # number of control nodes per cluster
+MCP_WORKER_NODE_COUNT=1    # number of worker nodes per cluster
 
-1.  AWS configuration files
+# AWS
+MCP_AWS_ACCESS_KEY=change                    # aws platform access key
+MCP_AWS_SECRET_KEY=change                    # aws platform secret key
+MCP_AWS_PUBLIC_KEY_PATH=~/.ssh/mcp_rsa.pub   # auth public rsa key
+MCP_AWS_PRIVATE_KEY_PATH=~/.ssh/mcp_rsa      # auth private rsa key
 
-1.1 Manager
-
-```
-rancher_admin_password: change
-aws_access_key: "change"
-aws_secret_key: "change"
-
-aws_public_key_path: ~/.ssh/it_rsa.pub
-aws_private_key_path: ~/.ssh/it_rsa
-```
-
-1.2 Cluster
-
-```
-aws_access_key: "change"
-aws_secret_key: "change"
-
-aws_public_key_path: ~/.ssh/it_rsa.pub
-aws_private_key_path: ~/.ssh/it_rsa
-```
-
-2.  GCP configuration files
-
-2.1 Manager
-
-```
-gcp_path_to_credentials: ~/.ssh/gcp.json
-
-gcp_public_key_path: ~/.ssh/it_rsa.pub
-gcp_private_key_path: ~/.ssh/it_rsa
-
-rancher_admin_password: change
-```
-
-2.2 Cluster
-
-```
-gcp_path_to_credentials: ~/.ssh/gcp.json
-
-gcp_public_key_path: ~/.ssh/it_rsa.pub
-gcp_private_key_path: ~/.ssh/it_rsa
+# GCP
+MCP_GCP_PROJECT_ID=gcp-project-id                         # gcp project id
+MCP_GCP_PATH_TO_CREDENTIALS=~/.ssh/gcp-credentials.json   # gcp service account credentials
+MCP_GCP_PUBLIC_KEY_PATH=~/.ssh/mcp_rsa.pub                # auth public rsa key
+MCP_GCP_PRIVATE_KEY_PATH=~/.ssh/mcp_rsa                   # auth private rsa key
 
 ```
 
-### Run the setup
+### Deployment
 
-Run `setup` command and specify cloud name (aws, gcp, all)
+- Source the environment from the configuration file running the following command:
 
-```
-./mcadm.sh setup aws
-```
+    ```
+    source load-env.sh <env>
+    ```
 
-Run `./mcadm.sh help` to see details about script usage.
+    E.g: `source load-env.sh dev`
 
-The information about Cluster Manager and Kubernetes Cluster will be shown in the console output.
+- To deploy resources run `setup` command and specify cloud name (aws|gcp|all)
+
+    ```
+    ./mcadm.sh setup aws
+    ```
 
 ### Cleanup
 
-To remove all the resources created by script run the command
+To remove all the resources deployed run the command:
 
 ```
 ./mcadm.sh destroy manager
 ```
+
+### FAQ
+
+- Run `./mcadm.sh help` to see details about script usage.
+
+- The information about the Kubernetes Cluster Manager will be shown in the console output.
+
+    E.g:
+    ```
+    rancher_access_key = token-1abcd
+    rancher_secret_key = xyz1xyz2xyz
+    rancher_url = https://3.4.1.2
+    ```
+
+- A multi-cloud setup on both AWS and GCP currently only allows the creation of Zabbix and Elastic Stack servers on AWS. 
+

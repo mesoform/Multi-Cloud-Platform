@@ -1,0 +1,14 @@
+name = "zabbix-elk"
+
+gcp_path_to_credentials = "{{MCP_GCP_PATH_TO_CREDENTIALS}}"
+gcp_public_key_path = "{{MCP_GCP_PUBLIC_KEY_PATH}}"
+gcp_project_id = "{{MCP_GCP_PROJECT_ID}}"
+gcp_k8s_cluster_name = "{{ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
+gcp_default_region = "{{MCP_GCP_DEFAULT_REGION}}"
+
+gcp_compute_region = "europe-west1"
+gcp_instance_zone = "europe-west1-c"
+gcp_volume_device_name = "/dev/sdf"
+gcp_ssh_user = "ubuntu"
+
+real_public_ip="{{REAL_PUBLIC_IP}}/32"
