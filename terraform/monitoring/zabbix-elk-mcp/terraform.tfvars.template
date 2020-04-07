@@ -1,9 +1,9 @@
 name = "zabbix-elk"
 
-aws_k8s_cluster_name = "{{ENV}}-aws-{{MCP_BASE_CLUSTER_NAME}}"
+aws_k8s_cluster_name = "{{MCP_ENV}}-aws-{{MCP_BASE_CLUSTER_NAME}}"
 aws_access_key = "{{MCP_AWS_ACCESS_KEY}}"
 aws_secret_key = "{{MCP_AWS_SECRET_KEY}}"
-aws_key_name = "{{ENV}}-{{MCP_BASE_MANAGER_CLOUD}}-{{MCP_BASE_CLUSTER_NAME}}_public_key_zabbix"
+aws_key_name = "{{MCP_ENV}}-{{MCP_BASE_MANAGER_CLOUD}}-{{MCP_BASE_CLUSTER_NAME}}_public_key_zabbix"
 aws_public_key_path = "{{MCP_AWS_PUBLIC_KEY_PATH}}"
 aws_private_key_path = "{{MCP_AWS_PRIVATE_KEY_PATH}}"
 
@@ -16,7 +16,7 @@ aws_ssh_user = "ubuntu"
 
 gcp_path_to_credentials = "{{MCP_GCP_PATH_TO_CREDENTIALS}}"
 gcp_project_id = "{{MCP_GCP_PROJECT_ID}}"
-gcp_k8s_cluster_name = "{{ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
+gcp_k8s_cluster_name = "{{MCP_ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
 
 gcp_compute_region = "europe-west2"
 gcp_vpc_cidr = "10.154.0.0/20"

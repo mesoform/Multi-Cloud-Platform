@@ -22,7 +22,7 @@ help() {
   echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config>"
   echo ""
   echo "Add command options:"
-  echo "  cluster <cloud> <name>      Add cluster for default manager, with name: ENV-<cloud>-<name>"
+  echo "  cluster <cloud> <name>      Add cluster for default manager, with name: MCP_ENV-<cloud>-<name>"
   echo "  enode   <cluster_config>    Add etcd node to cluster, identified by <cluster_config>"
   echo "  cnode   <cluster_config>    Add control node to cluster, identified by <cluster_config>"
   echo "  wnode   <cluster_config>    Add worker node to cluster, identified by <cluster_config>"
@@ -39,10 +39,6 @@ SCRIPT_NAME=$0
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${SCRIPT_DIR}/functions.sh"
-
-TERRAFORM_MON="${SCRIPT_DIR}/terraform/monitoring"
-
 COMMAND=$1
 [[ -z "${COMMAND}" ]] && help && exit 1
 shift
@@ -56,13 +52,226 @@ shift
 
 OPTION_3=$1
 
+ENV_PATH="${SCRIPT_DIR}/env/default.vars"
+
+if [[ ! -f "${ENV_PATH}" ]]; then
+  echo "Environment file not found: ${ENV_PATH}"
+  help && return
+fi
+
+source ${SCRIPT_DIR}/env/default.vars
+
 # Verify whether envronment is selected
-[[ -z "${ENV}" ]] && echo "No environment selected. Run: source load-env.sh <env_name>" && exit 1
+[[ -z "${MCP_ENV}" ]] && echo "No environment selected" && exit 1
+
+echo "Environment:" ${MCP_ENV}
+
+
+# Configurations directory
+CONFIG_DIR="${SCRIPT_DIR}/config"
+mkdir -p "${CONFIG_DIR}/${MCP_ENV}"
+TEMPLATES_DIR="${CONFIG_DIR}/templates"
+
+# Binaries directory
+BIN="${SCRIPT_DIR}/bin"
+mkdir -p "${BIN}"
+PATH="${BIN}:${PATH}"
+
+TERRAFORM="${BIN}/terraform"
+TK8S="${BIN}/triton-kubernetes"
+MO="${BIN}/mo"
+# Determine whether to use local triton-kubernetes sources
+SOURCE_URL_BASE=github.com/mesoform/triton-kubernetes
+if [[ -e "$HOME/go/src/${SOURCE_URL_BASE}"  ]]; then
+    export SOURCE_URL="$HOME/go/src/${SOURCE_URL_BASE}"
+else
+    export SOURCE_URL="${SOURCE_URL_BASE}"
+fi
+export SOURCE_REF=master
+
+# Retrieve real public IP address
+REAL_PUBLIC_IP=$(curl -s ifconfig.co)
+
+# Export environment vars
+export MCP_ENV=$MCP_ENV
+export ENV_PATH=$ENV_PATH
+export CONFIG_DIR=$CONFIG_DIR
+export TEMPLATES_DIR=$TEMPLATES_DIR
+export TERRAFORM=$TERRAFORM
+export TK8S=$TK8S
+export MO=$MO
+export REAL_PUBLIC_IP=$REAL_PUBLIC_IP
+
+# Load functions
+source "${SCRIPT_DIR}/functions.sh"
 
 source_environment
 
 set -e
 set -u
+
+##
+## Install section
+##
+installDependencies() {
+    echo "Installing dependencies"
+
+    OS="$(uname)"
+    case ${OS} in
+        'Linux')
+            installLinuxDependencies
+            ;;
+        'Darwin')
+            installDarwinDependencies
+            ;;
+        *)
+            echo "Couldn't determine OS type."
+            return
+            ;;
+    esac
+}
+
+installLinuxDependencies() {
+    # Install JSON processor
+    echo "Getting jq ..."
+    sudo apt-get install -y jq
+
+    # Install YAML processor
+    echo "Getting yq ..."
+    sudo add-apt-repository -y ppa:rmescandon/yq
+    sudo apt-get update
+    sudo apt-get install -y yq
+
+    # Install Terraform
+    if [[ ! -e "${TERRAFORM}" ]]; then
+        echo ""
+        echo "Getting the terraform ..."
+        echo ""
+
+        cd "${BIN}"
+        TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip
+        TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
+        wget "${TERRAFORM_URL_LIN}"
+        unzip -o "${TERRAFORM_FILE_LIN}"
+        rm "${TERRAFORM_FILE_LIN}"
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "Terraform for $OS installed."
+        echo ""
+    fi
+
+    # Install triton-kubernetes
+    if [[ ! -e "${TK8S}" ]]; then
+        echo ""
+        echo "Getting the triton-kubernetes ..."
+        echo ""
+
+        cd "${BIN}"
+        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_linux-amd64.zip
+        TK8S_FILE_LIN="${TK8S_URL_LIN##*/}"
+
+        echo "URL: ${TK8S_URL_LIN}"
+        echo "File: ${TK8S_FILE_LIN}"
+
+        wget "${TK8S_URL_LIN}"
+        unzip "${TK8S_FILE_LIN}"
+        rm "${TK8S_FILE_LIN}"
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "triton-kubernetes for $OS installed"
+        echo ""
+    fi
+
+    # Install Mustache templates binary
+    if [[ ! -e "${MO}" ]]; then
+        echo ""
+        echo "Getting the mustache templates ..."
+        echo ""
+
+        cd "${BIN}"
+        curl -sSL https://git.io/get-mo -o mo
+        chmod +x mo
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "mustache binary for $OS installed"
+        echo ""
+    fi
+}
+
+installDarwinDependencies() {
+    # Install JSON processor
+    echo "Getting jq ..."
+    [[ $(brew list jq) ]] || brew install jq
+
+    # Install YAML processor
+    echo "Getting yq ..."
+    [[ $(brew list yq) ]] || brew install yq
+
+    # Install Terraform
+    if [[ ! -e "${TERRAFORM}" ]]; then
+        echo ""
+        echo "Getting the terraform ..."
+        echo ""
+
+        cd "${BIN}"
+        TERRAFORM_URL_DAR=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_darwin_amd64.zip
+        TERRAFORM_FILE_DAR="${TERRAFORM_URL_DAR##*/}"
+
+        echo "URL: ${TERRAFORM_URL_DAR}"
+        echo "File: ${TERRAFORM_FILE_DAR}"
+
+        curl "${TERRAFORM_URL_DAR}" --output "${TERRAFORM_FILE_DAR}"
+        unzip "${TERRAFORM_FILE_DAR}"
+        rm "${TERRAFORM_FILE_DAR}"
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "Terraform for $OS installed."
+        echo ""
+    fi
+
+    # Install triton-kubernetes
+    if [[ ! -e "${TK8S}" ]]; then
+        echo ""
+        echo "Getting the triton-kubernetes ..."
+        echo ""
+
+        cd "${BIN}"
+        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_osx-amd64.zip
+        TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
+
+        echo "URL: ${TK8S_URL_DAR}"
+        echo "File: ${TK8S_FILE_DAR}"
+
+        curl -L "${TK8S_URL_DAR}" --output "${TK8S_FILE_DAR}"
+        unzip "${TK8S_FILE_DAR}"
+        rm "${TK8S_FILE_DAR}"
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "triton-kubernetes for $OS installed"
+        echo ""
+    fi
+
+    # Install Mustache templates binary
+    if [[ ! -e "${MO}" ]]; then
+        echo ""
+        echo "Getting the mustache templates ..."
+        echo ""
+
+        cd "${BIN}"
+        curl -sSL https://git.io/get-mo -o mo
+        chmod +x mo
+        cd "${SCRIPT_DIR}"
+
+        echo ""
+        echo "Mustache binary for $OS installed"
+        echo ""
+    fi
+}
 
 # ####################################################
 # Command Runners
@@ -131,15 +340,16 @@ runAdd() {
 }
 
 runDestroy() {
+  terraform_mon="${SCRIPT_DIR}/terraform/monitoring"
   case "${OPTION_1}" in
   manager)
-    if [[ -f ${TERRAFORM_MON}/zabbix-elk-aws-only/terraform.tfvars ]]; then
+    if [[ -f ${terraform_mon}/zabbix-elk-aws-only/terraform.tfvars ]]; then
         echo "AWS"
         ${SCRIPT_DIR}/monitoring/moniadm.sh destroy aws
-    elif [[ -f ${TERRAFORM_MON}/zabbix-elk-gcp-only/terraform.tfvars ]]; then
+    elif [[ -f ${terraform_mon}/zabbix-elk-gcp-only/terraform.tfvars ]]; then
         echo "GCP"
         ${SCRIPT_DIR}/monitoring/moniadm.sh destroy gcp
-    elif [[ -f ${TERRAFORM_MON}/zabbix-elk-mcp/terraform.tfvars ]]; then
+    elif [[ -f ${terraform_mon}/zabbix-elk-mcp/terraform.tfvars ]]; then
         echo "ALL"
         ${SCRIPT_DIR}/monitoring/moniadm.sh destroy all
     else
@@ -183,7 +393,7 @@ setupManager() {
   echo "Triton Kubernetes version: $(${TK8S} version)"
   echo ""
   ${TK8S} create manager --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/${ENV}-${current_cloud}-${MCP_BASE_MANAGER_NAME}.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/${MCP_ENV}-${current_cloud}-${MCP_BASE_MANAGER_NAME}.yaml"
 }
 
 setupCluster() {
@@ -198,7 +408,7 @@ setupCluster() {
   echo ""
 
   for cln in $(echo "${MCP_BASE_CLUSTER_NAME}"); do
-    for cnf in "${CONFIG_DIR}"/"${ENV}"/"${ENV}"-${current_cloud}-"${cln}".yaml; do
+    for cnf in "${CONFIG_DIR}"/"${MCP_ENV}"/"${MCP_ENV}"-${current_cloud}-"${cln}".yaml; do
       ${TK8S} create cluster --non-interactive --config "${cnf}"
       sleep 5
     done
@@ -209,10 +419,10 @@ setupCluster() {
 
 getManager() {
   # Getting info about created manager
-  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
-  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${ENV}/manager-info.yaml"
+  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
   ${TK8S} get manager --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
 
   # Generate rancher variables file
   export RANCHER_ACCESS_KEY=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_access_key)
@@ -234,12 +444,12 @@ getCluster() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
-  ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+  ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/cluster-info.yaml"
 
   ${TK8S} get cluster --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/cluster-info.yaml"
 }
 
 # :::::::::: Add functions
@@ -272,8 +482,8 @@ addCluster() {
   echo ""
 
   for cld in "${cloud_list[@]}"; do
-    export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
-    export MCP_CLUSTER_NAME="${ENV}-${cld}-${cluster_name}"
+    export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+    export MCP_CLUSTER_NAME="${MCP_ENV}-${cld}-${cluster_name}"
     export MCP_ETCD_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_ETCD_NODE_NAME}"
     export MCP_CONTROL_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_CONTROL_NODE_NAME}"
     export MCP_WORKER_NODE_NAME="${MCP_CLUSTER_NAME}-${MCP_BASE_WORKER_NODE_NAME}"
@@ -281,9 +491,9 @@ addCluster() {
       key_name_suffix=$(date +%s | md5 | head -c 8)
       export MCP_AWS_CLUSTER_KEY_NAME="${MCP_CLUSTER_NAME}_public_key_${key_name_suffix}"
     fi
-    renderClusterConfig "${cld}" >"${CONFIG_DIR}/${ENV}/${ENV}-${cld}-${cluster_name}.yaml"
+    renderClusterConfig "${cld}" >"${CONFIG_DIR}/${MCP_ENV}/${MCP_ENV}-${cld}-${cluster_name}.yaml"
     ${TK8S} create cluster --non-interactive \
-      --config "${CONFIG_DIR}/${ENV}/${ENV}-${cld}-${cluster_name}.yaml"
+      --config "${CONFIG_DIR}/${MCP_ENV}/${MCP_ENV}-${cld}-${cluster_name}.yaml"
     sleep 5
   done
 }
@@ -324,10 +534,10 @@ addNode() {
   local current_cloud=$(yq r "${cluster_config}" 'cluster_cloud_provider')
 
   renderNodeConfig "${current_cloud}" > \
-    "${CONFIG_DIR}/${ENV}/${MCP_NODE_NAME}.yaml"
+    "${CONFIG_DIR}/${MCP_ENV}/${MCP_NODE_NAME}.yaml"
 
   ${TK8S} create node --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/${MCP_NODE_NAME}.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/${MCP_NODE_NAME}.yaml"
 }
 
 # :::::::::: Destroy functions
@@ -338,13 +548,13 @@ function destroyManager() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
-  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${ENV}/manager-info.yaml"
+  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
 
   ${TK8S} destroy manager --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/manager-info.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
 
-  rm -rf "${CONFIG_DIR:?}/${ENV:?}/"
+  rm -rf "${CONFIG_DIR:?}/${MCP_ENV:?}/"
 }
 
 function destroyCluster() {
@@ -356,12 +566,12 @@ function destroyCluster() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
-  ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+  ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/cluster-info.yaml"
 
   ${TK8S} destroy cluster --non-interactive \
-    --config "${CONFIG_DIR}/${ENV}/cluster-info.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/cluster-info.yaml"
 }
 
 function destroyNode() {
@@ -373,13 +583,15 @@ function destroyNode() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
-  ${MO} "${TEMPLATES_DIR}/node-info-template.yaml" >"${CONFIG_DIR}/${ENV}/node-info.yaml"
+  ${MO} "${TEMPLATES_DIR}/node-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/node-info.yaml"
 
   ${TK8S} destroy node \
-    --config "${CONFIG_DIR}/${ENV}/node-info.yaml"
+    --config "${CONFIG_DIR}/${MCP_ENV}/node-info.yaml"
 }
+
+#installDependencies
 
 # ####################################################
 # Command selector
@@ -387,6 +599,31 @@ function destroyNode() {
 
 case "${COMMAND}" in
 setup)
+  echo "runSetup"
+  echo "--------"
+  echo "MCP_ENV:" ${MCP_ENV}
+  echo "MCP_BASE_MANAGER_CLOUD:" ${MCP_BASE_MANAGER_CLOUD}
+  echo "MCP_BASE_MANAGER_NAME:" ${MCP_BASE_MANAGER_NAME}
+  echo "MCP_RANCHER_ADMIN_PASSWORD:" ${MCP_RANCHER_ADMIN_PASSWORD}
+  echo "MCP_BASE_CLUSTER_NAME:" ${MCP_BASE_CLUSTER_NAME}
+  echo "MCP_K8S_NETWORK_PROVIDER:" ${MCP_K8S_NETWORK_PROVIDER}
+  echo "MCP_BASE_ETCD_NODE_NAME:" ${MCP_BASE_ETCD_NODE_NAME}
+  echo "MCP_BASE_CONTROL_NODE_NAME:" ${MCP_BASE_CONTROL_NODE_NAME}
+  echo "MCP_BASE_WORKER_NODE_NAME:" ${MCP_BASE_WORKER_NODE_NAME}
+  echo "MCP_ETCD_NODE_COUNT:" ${MCP_ETCD_NODE_COUNT}
+  echo "MCP_CONTROL_NODE_COUNT:" ${MCP_CONTROL_NODE_COUNT}
+  echo "MCP_WORKER_NODE_COUNT:" ${MCP_WORKER_NODE_COUNT}
+  echo "MCP_AWS_ACCESS_KEY:" ${MCP_AWS_ACCESS_KEY}
+  echo "MCP_AWS_SECRET_KEY:" ${MCP_AWS_SECRET_KEY}
+  echo "MCP_AWS_DEFAULT_REGION:" ${MCP_AWS_DEFAULT_REGION}
+  echo "MCP_AWS_PUBLIC_KEY_PATH:" ${MCP_AWS_PUBLIC_KEY_PATH}
+  echo "MCP_AWS_PRIVATE_KEY_PATH:" ${MCP_AWS_PRIVATE_KEY_PATH}
+  echo "MCP_GCP_PROJECT_ID:" ${MCP_GCP_PROJECT_ID}
+  echo "MCP_GCP_PATH_TO_CREDENTIALS:" ${MCP_GCP_PATH_TO_CREDENTIALS}
+  echo "MCP_GCP_DEFAULT_REGION:" ${MCP_GCP_DEFAULT_REGION}
+  echo "MCP_GCP_PUBLIC_KEY_PATH:" ${MCP_GCP_PUBLIC_KEY_PATH}
+  echo "MCP_GCP_PRIVATE_KEY_PATH:" ${MCP_GCP_PRIVATE_KEY_PATH}
+
   runSetup
   ;;
 

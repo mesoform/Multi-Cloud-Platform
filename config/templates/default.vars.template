@@ -1,14 +1,3 @@
-# Multi cloud platform scripts
-
-Multi cloud platform contains scripts and configurations to run interactive deployment of Triton Kubernetes solution on AWS and/or GCP along with Zabbix monitoring and Elastic Stack logging.
-
-## Quick start guide
-
-### Prepare to run deployment
-
-Clone the `mcp-setup` git repository and edit the configuration file `default.vars` found under `env` folder:
-
-```
 # Edit and make the appropriate changes relevant to your environment and cloud providers (AWS/GCP)
 
 MCP_ENV=dev                          # Deployment environment name (dev/test/prod/etc.)
@@ -43,36 +32,3 @@ MCP_GCP_PATH_TO_CREDENTIALS=~/.ssh/gcp-credentials.json   # gcp service account 
 MCP_GCP_DEFAULT_REGION=europe-west2                       # gcp default region
 MCP_GCP_PUBLIC_KEY_PATH=~/.ssh/id_rsa.pub                 # auth public rsa key
 MCP_GCP_PRIVATE_KEY_PATH=~/.ssh/id_rsa                    # auth private rsa key
-
-```
-
-### Deployment
-
-- To deploy resources run `setup` command and specify cloud name (aws|gcp|all)
-
-    ```
-    ./mcadm.sh setup aws
-    ```
-
-### Cleanup
-
-- To remove all the resources deployed run the command:
-
-    ```
-    ./mcadm.sh destroy manager
-    ```
-
-### FAQ
-
-- Run `./mcadm.sh help` to see details about script usage.
-
-- The information about the Kubernetes Cluster Manager will be shown in the console output.
-
-    E.g:
-    ```
-    rancher_access_key = token-1abcd
-    rancher_secret_key = xyz1xyz2xyz
-    rancher_url = https://3.4.1.2
-    ```
-
-- A multi-cloud setup on both AWS and GCP currently only allows the creation of Zabbix and Elastic Stack servers on AWS. 

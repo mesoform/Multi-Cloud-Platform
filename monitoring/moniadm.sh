@@ -195,7 +195,7 @@ installDependencies() {
             installDarwinDependencies
             ;;
         *)
-            echo "Couldn't determine os type."
+            echo "Couldn't determine OS type."
             exit 1
             ;;
     esac
