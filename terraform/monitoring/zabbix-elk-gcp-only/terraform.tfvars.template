@@ -11,4 +11,4 @@ gcp_instance_zone = "europe-west1-c"
 gcp_volume_device_name = "/dev/sdf"
 gcp_ssh_user = "ubuntu"
 
-real_public_ip="{{REAL_PUBLIC_IP}}/32"
+local_public_ip="{{LOCAL_PUBLIC_IP}}/32"

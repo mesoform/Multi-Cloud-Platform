@@ -115,4 +115,4 @@ variable "gcp_k8s_cluster_name" {
   default = "mcp-gcp-cluster"
 }
 
-variable "real_public_ip" {}
+variable "local_public_ip" {}

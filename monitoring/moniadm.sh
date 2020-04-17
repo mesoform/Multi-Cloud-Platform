@@ -7,9 +7,9 @@ help() {
    echo "Commands:"
    echo "  setup    <cloud>    Setup monitoring/ELK infrastructure"
    echo "  destroy  <cloud>    Destroy monitoring/ELK infrastructure"
-   echo "  gends    <cloud>    Generate k8s manifests"
-   echo "  applyDS  <cloud>    Apply daemon sets"
-   echo "  deleteDS            Destroy daemon sets"
+#   echo "  gends    <cloud>    Generate k8s manifests"
+#   echo "  applyDS  <cloud>    Apply daemon sets"
+#   echo "  deleteDS            Destroy daemon sets"
    echo ""
    echo "Commands options:"
    echo "  aws    Apply command to monitoring and ELK on AWS"
@@ -33,8 +33,28 @@ OPTION_1=$1
 set -u
 set -o pipefail
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ENV_PATH="${SCRIPT_DIR}/../env/default.vars"
 
+if [[ ! -f "${ENV_PATH}" ]]; then
+  echo "Environment file not found: ${ENV_PATH}"
+  help && exit
+fi
+
+# Load functions
+source "${SCRIPT_DIR}/../functions.sh"
+
+# Load default vars
+source ${SCRIPT_DIR}/../env/default.vars
+
+# Get local public IP address
+LOCAL_PUBLIC_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+export LOCAL_PUBLIC_IP=$LOCAL_PUBLIC_IP
+
+export_env_vars
+
+verify_env_vars
+
+echo "CONTINUE"
 BIN="${SCRIPT_DIR}/../bin"
 mkdir -p ${BIN}
 
@@ -52,28 +72,35 @@ MO="${BIN}/mo"
 
 ZABBIX_RESOURCES="${SCRIPT_DIR}/../config/zabbix"
 
-source "${SCRIPT_DIR}/funcsmon.sh"
+#source "${SCRIPT_DIR}/funcsmon.sh"
 
 runSetup() {
     [[ -z "${OPTION_1}" ]] && help && exit 1
 
     case "${OPTION_1}" in
       aws)
+        echo "AWS"
         TERRAFORM_ROOT_MODULE="zabbix-elk-aws-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       gcp)
+        echo "GCP"
         TERRAFORM_ROOT_MODULE="zabbix-elk-gcp-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       all)
+        echo "ALL"
         TERRAFORM_ROOT_MODULE="zabbix-elk-mcp"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       *)
+        echo "EXIT"
         help && exit 1
         ;;
     esac
@@ -117,7 +144,7 @@ gends() {
 generateKubeconfig() {
 
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    RANCHER_VARS="${CONFIG_DIR}/rancher.vars"
+    RANCHER_VARS="${SCRIPT_DIR}/../config/rancher.vars"
     source "${RANCHER_VARS}"
     rancher_token="${RANCHER_ACCESS_KEY}:${RANCHER_SECRET_KEY}"
     rancher_clusters_api="${RANCHER_URL}/v3/clusters/"
@@ -286,6 +313,7 @@ setupOrDestroyZabbixServer() {
     ${TERRAFORM} ${TERRAFORM_COMMAND} -auto-approve -var-file "${TERRAFORM_ROOT}/terraform.tfvars"
 }
 
+
 case "${COMMAND}" in
   setup)
     generateKubeconfig
@@ -302,8 +330,7 @@ case "${COMMAND}" in
            "${TERRAFORM_ROOT}/terraform.tfstate" \
            "${TERRAFORM_ROOT}/terraform.tfstate.backup" \
            "${TERRAFORM_ROOT}/terraform.tfvars" \
-           "${ZABBIX_RESOURCES}/zabbix-autoreg.json" \
-           "${RANCHER_VARS}"
+           "${ZABBIX_RESOURCES}/zabbix-autoreg.json"
     ;;
 
   gends)

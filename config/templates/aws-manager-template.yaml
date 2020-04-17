@@ -7,8 +7,8 @@ private_registry_username: ""
 private_registry_password: ""
 rancher_server_image: ""
 rancher_agent_image: ""
-# set password for rancher 'admin' user
-rancher_admin_password: {{MCP_RANCHER_ADMIN_PASSWORD}}
+# set password for rancher admin user
+rancher_admin_password: {{MCP_RANCHER_ADMIN_PWD}}
 # set AWS access and secret keys
 aws_access_key: {{MCP_AWS_ACCESS_KEY}}
 aws_secret_key: {{MCP_AWS_SECRET_KEY}}

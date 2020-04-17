@@ -21,4 +21,4 @@ gcp_k8s_cluster_name = "{{MCP_ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
 gcp_compute_region = "europe-west2"
 gcp_vpc_cidr = "10.154.0.0/20"
 
-real_public_ip="{{REAL_PUBLIC_IP}}/32"
+local_public_ip="{{LOCAL_PUBLIC_IP}}/32"

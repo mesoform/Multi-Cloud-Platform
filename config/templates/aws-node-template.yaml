@@ -28,6 +28,6 @@ node_count: {{MCP_NODE_COUNT}}
 rancher_host_label: {{MCP_NODE_TYPE}}
 hostname: {{MCP_NODE_NAME}}
 aws_ami_id: ami-04606ba5d5fb731cc
-aws_instance_type: t2.small
+aws_instance_type: t2.medium
 ebs_volume_iops: 100
 ebs_volume_size: 10

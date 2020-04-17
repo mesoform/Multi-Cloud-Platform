@@ -19,10 +19,10 @@ help() {
   echo ""
   echo "Get command options:"
   echo "  manager                      Get information about current manager"
-  echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config>"
+  echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config> / e.g: get cluster config/test/dev-aws-cluster.yaml "
   echo ""
   echo "Add command options:"
-  echo "  cluster <cloud> <name>      Add cluster for default manager, with name: MCP_ENV-<cloud>-<name>"
+  echo "  cluster <cloud> <name>      Add cluster for default manager, name will be: <env>-<cloud>-<name> / e.g: add cluster aws cluster-1"
   echo "  enode   <cluster_config>    Add etcd node to cluster, identified by <cluster_config>"
   echo "  cnode   <cluster_config>    Add control node to cluster, identified by <cluster_config>"
   echo "  wnode   <cluster_config>    Add worker node to cluster, identified by <cluster_config>"
@@ -59,13 +59,19 @@ if [[ ! -f "${ENV_PATH}" ]]; then
   help && return
 fi
 
+# Load functions
+source "${SCRIPT_DIR}/functions.sh"
+
+# Load default vars
 source ${SCRIPT_DIR}/env/default.vars
 
-# Verify whether envronment is selected
-[[ -z "${MCP_ENV}" ]] && echo "No environment selected" && exit 1
+# Get local public IP address
+LOCAL_PUBLIC_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+export LOCAL_PUBLIC_IP=$LOCAL_PUBLIC_IP
 
-echo "Environment:" ${MCP_ENV}
+export_env_vars
 
+verify_env_vars
 
 # Configurations directory
 CONFIG_DIR="${SCRIPT_DIR}/config"
@@ -78,6 +84,8 @@ mkdir -p "${BIN}"
 PATH="${BIN}:${PATH}"
 
 TERRAFORM="${BIN}/terraform"
+TERRAFORM_MON="${SCRIPT_DIR}/terraform/monitoring"
+MONIADM_ACTION=""
 TK8S="${BIN}/triton-kubernetes"
 MO="${BIN}/mo"
 # Determine whether to use local triton-kubernetes sources
@@ -89,26 +97,21 @@ else
 fi
 export SOURCE_REF=master
 
-# Retrieve real public IP address
-REAL_PUBLIC_IP=$(curl -s ifconfig.co)
-
-# Export environment vars
-export MCP_ENV=$MCP_ENV
+# Export config vars
 export ENV_PATH=$ENV_PATH
 export CONFIG_DIR=$CONFIG_DIR
 export TEMPLATES_DIR=$TEMPLATES_DIR
 export TERRAFORM=$TERRAFORM
+export TERRAFORM_MON=$TERRAFORM_MON
+export MONIADM_ACTION=$MONIADM_ACTION
 export TK8S=$TK8S
 export MO=$MO
-export REAL_PUBLIC_IP=$REAL_PUBLIC_IP
 
-# Load functions
-source "${SCRIPT_DIR}/functions.sh"
 
-source_environment
+#source_environment
 
-set -e
-set -u
+#set -e
+#set -u
 
 ##
 ## Install section
@@ -145,7 +148,7 @@ installLinuxDependencies() {
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
         echo ""
-        echo "Getting the terraform ..."
+        echo "Getting terraform ..."
         echo ""
 
         cd "${BIN}"
@@ -164,7 +167,7 @@ installLinuxDependencies() {
     # Install triton-kubernetes
     if [[ ! -e "${TK8S}" ]]; then
         echo ""
-        echo "Getting the triton-kubernetes ..."
+        echo "Getting triton-kubernetes ..."
         echo ""
 
         cd "${BIN}"
@@ -187,7 +190,7 @@ installLinuxDependencies() {
     # Install Mustache templates binary
     if [[ ! -e "${MO}" ]]; then
         echo ""
-        echo "Getting the mustache templates ..."
+        echo "Getting mustache templates ..."
         echo ""
 
         cd "${BIN}"
@@ -213,7 +216,7 @@ installDarwinDependencies() {
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
         echo ""
-        echo "Getting the terraform ..."
+        echo "Getting terraform ..."
         echo ""
 
         cd "${BIN}"
@@ -236,7 +239,7 @@ installDarwinDependencies() {
     # Install triton-kubernetes
     if [[ ! -e "${TK8S}" ]]; then
         echo ""
-        echo "Getting the triton-kubernetes ..."
+        echo "Getting triton-kubernetes ..."
         echo ""
 
         cd "${BIN}"
@@ -259,7 +262,7 @@ installDarwinDependencies() {
     # Install Mustache templates binary
     if [[ ! -e "${MO}" ]]; then
         echo ""
-        echo "Getting the mustache templates ..."
+        echo "Getting mustache templates ..."
         echo ""
 
         cd "${BIN}"
@@ -276,6 +279,21 @@ installDarwinDependencies() {
 # ####################################################
 # Command Runners
 # ####################################################
+
+runMoniadm() {
+  if [[ -f ${TERRAFORM_MON}/zabbix-elk-aws-only/terraform.tfvars ]]; then
+    echo "AWS"
+    ${SCRIPT_DIR}/monitoring/moniadm.sh ${MONIADM_ACTION} aws
+  elif [[ -f ${TERRAFORM_MON}/zabbix-elk-gcp-only/terraform.tfvars ]]; then
+    echo "GCP"
+    ${SCRIPT_DIR}/monitoring/moniadm.sh ${MONIADM_ACTION} gcp
+  elif [[ -f ${TERRAFORM_MON}/zabbix-elk-mcp/terraform.tfvars ]]; then
+    echo "ALL"
+    ${SCRIPT_DIR}/monitoring/moniadm.sh ${MONIADM_ACTION} all
+  else
+    echo "File terraform.tfvars not found"
+  fi
+}
 
 runSetup() {
   case "${OPTION_1}" in
@@ -297,6 +315,7 @@ runSetup() {
 
   # Zabbix and ELK setup
   ${SCRIPT_DIR}/monitoring/moniadm.sh setup ${OPTION_1}
+
 }
 
 runGet() {
@@ -323,14 +342,20 @@ runAdd() {
 
   enode)
     addEtcdNode "${OPTION_2}"
+    MONIADM_ACTION="setup"
+    runMoniadm
     ;;
 
   cnode)
     addControlNode "${OPTION_2}"
+    MONIADM_ACTION="setup"
+    runMoniadm
     ;;
 
   wnode)
     addWokerNode "${OPTION_2}"
+    MONIADM_ACTION="setup"
+    runMoniadm
     ;;
 
   *)
@@ -340,21 +365,10 @@ runAdd() {
 }
 
 runDestroy() {
-  terraform_mon="${SCRIPT_DIR}/terraform/monitoring"
   case "${OPTION_1}" in
   manager)
-    if [[ -f ${terraform_mon}/zabbix-elk-aws-only/terraform.tfvars ]]; then
-        echo "AWS"
-        ${SCRIPT_DIR}/monitoring/moniadm.sh destroy aws
-    elif [[ -f ${terraform_mon}/zabbix-elk-gcp-only/terraform.tfvars ]]; then
-        echo "GCP"
-        ${SCRIPT_DIR}/monitoring/moniadm.sh destroy gcp
-    elif [[ -f ${terraform_mon}/zabbix-elk-mcp/terraform.tfvars ]]; then
-        echo "ALL"
-        ${SCRIPT_DIR}/monitoring/moniadm.sh destroy all
-    else
-        echo "File terraform.tfvars not found"
-    fi
+    MONIADM_ACTION="destroy"
+    runMoniadm
     destroyManager
     ;;
 
@@ -554,7 +568,7 @@ function destroyManager() {
   ${TK8S} destroy manager --non-interactive \
     --config "${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
 
-  rm -rf "${CONFIG_DIR:?}/${MCP_ENV:?}/"
+  rm -rf "${CONFIG_DIR:?}/${MCP_ENV:?}/" "${CONFIG_DIR}/rancher.vars"
 }
 
 function destroyCluster() {
@@ -591,7 +605,7 @@ function destroyNode() {
     --config "${CONFIG_DIR}/${MCP_ENV}/node-info.yaml"
 }
 
-#installDependencies
+installDependencies
 
 # ####################################################
 # Command selector
@@ -601,28 +615,7 @@ case "${COMMAND}" in
 setup)
   echo "runSetup"
   echo "--------"
-  echo "MCP_ENV:" ${MCP_ENV}
-  echo "MCP_BASE_MANAGER_CLOUD:" ${MCP_BASE_MANAGER_CLOUD}
-  echo "MCP_BASE_MANAGER_NAME:" ${MCP_BASE_MANAGER_NAME}
-  echo "MCP_RANCHER_ADMIN_PASSWORD:" ${MCP_RANCHER_ADMIN_PASSWORD}
-  echo "MCP_BASE_CLUSTER_NAME:" ${MCP_BASE_CLUSTER_NAME}
-  echo "MCP_K8S_NETWORK_PROVIDER:" ${MCP_K8S_NETWORK_PROVIDER}
-  echo "MCP_BASE_ETCD_NODE_NAME:" ${MCP_BASE_ETCD_NODE_NAME}
-  echo "MCP_BASE_CONTROL_NODE_NAME:" ${MCP_BASE_CONTROL_NODE_NAME}
-  echo "MCP_BASE_WORKER_NODE_NAME:" ${MCP_BASE_WORKER_NODE_NAME}
-  echo "MCP_ETCD_NODE_COUNT:" ${MCP_ETCD_NODE_COUNT}
-  echo "MCP_CONTROL_NODE_COUNT:" ${MCP_CONTROL_NODE_COUNT}
-  echo "MCP_WORKER_NODE_COUNT:" ${MCP_WORKER_NODE_COUNT}
-  echo "MCP_AWS_ACCESS_KEY:" ${MCP_AWS_ACCESS_KEY}
-  echo "MCP_AWS_SECRET_KEY:" ${MCP_AWS_SECRET_KEY}
-  echo "MCP_AWS_DEFAULT_REGION:" ${MCP_AWS_DEFAULT_REGION}
-  echo "MCP_AWS_PUBLIC_KEY_PATH:" ${MCP_AWS_PUBLIC_KEY_PATH}
-  echo "MCP_AWS_PRIVATE_KEY_PATH:" ${MCP_AWS_PRIVATE_KEY_PATH}
-  echo "MCP_GCP_PROJECT_ID:" ${MCP_GCP_PROJECT_ID}
-  echo "MCP_GCP_PATH_TO_CREDENTIALS:" ${MCP_GCP_PATH_TO_CREDENTIALS}
-  echo "MCP_GCP_DEFAULT_REGION:" ${MCP_GCP_DEFAULT_REGION}
-  echo "MCP_GCP_PUBLIC_KEY_PATH:" ${MCP_GCP_PUBLIC_KEY_PATH}
-  echo "MCP_GCP_PRIVATE_KEY_PATH:" ${MCP_GCP_PRIVATE_KEY_PATH}
+  print_env_vars
 
   runSetup
   ;;
@@ -643,7 +636,7 @@ destroy)
   help && exit 1
   ;;
 esac
-
+#
 echo ""
 echo "MCP admin process completed: ${COMMAND}"
 echo ""

@@ -14,4 +14,4 @@ aws_ami_id = "ami-0be057a22c63962cb"
 aws_instance_type = "t2.micro"
 aws_ssh_user = "ubuntu"
 
-real_public_ip="{{REAL_PUBLIC_IP}}/32"
+local_public_ip="{{LOCAL_PUBLIC_IP}}/32"

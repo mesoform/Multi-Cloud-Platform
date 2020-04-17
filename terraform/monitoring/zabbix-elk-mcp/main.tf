@@ -37,7 +37,7 @@ module "zabbix_elk_vpc" {
   aws_subnet_cidr     = "${var.aws_subnet_cidr}"
   aws_key_name        = "${var.aws_key_name}"
   aws_public_key_path = "${var.aws_public_key_path}"
-  real_public_ip      = "${var.real_public_ip}"
+  local_public_ip      = "${var.local_public_ip}"
 }
 
 module "aws_zabbix_virtual_private_gateway" {
@@ -110,7 +110,8 @@ data "aws_route_table" "rt_cluster01" {
   subnet_id = "${data.aws_subnet.subnet_cluster01.id}"
 }
 
-# Security group assossiated with Kubernetes cluster's VPC
+# Security group assossiated with Kubernetes cluster's VPCide
+
 data "aws_security_group" "sg_cluster01" {
   name = "${var.aws_k8s_cluster_name}"
   vpc_id = "${data.aws_vpc.cluster.id}"

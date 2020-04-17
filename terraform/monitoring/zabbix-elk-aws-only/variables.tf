@@ -88,5 +88,5 @@ variable "ebs_volume_size" {
   default = "10"
 }
 
-variable "real_public_ip" {}
+variable "local_public_ip" {}
 

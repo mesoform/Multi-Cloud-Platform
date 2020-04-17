@@ -50,4 +50,4 @@ variable "gcp_ssh_user" {}
 
 variable "gcp_public_key_path" {}
 
-variable "real_public_ip" {}
+variable "local_public_ip" {}

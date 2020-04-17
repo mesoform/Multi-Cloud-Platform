@@ -21,4 +21,4 @@ variable "aws_public_key_path" {
   default     = ""
 }
 
-variable "real_public_ip" {}
+variable "local_public_ip" {}

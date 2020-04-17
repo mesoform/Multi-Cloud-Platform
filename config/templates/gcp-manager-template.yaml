@@ -15,4 +15,4 @@ gcp_image: ubuntu-1604-xenial-v20190430
 gcp_public_key_path: {{MCP_GCP_PUBLIC_KEY_PATH}}
 gcp_private_key_path: {{MCP_GCP_PRIVATE_KEY_PATH}}
 gcp_ssh_user: root
-rancher_admin_password: {{MCP_RANCHER_ADMIN_PASSWORD}}
+rancher_admin_password: {{MCP_RANCHER_ADMIN_PWD}}
