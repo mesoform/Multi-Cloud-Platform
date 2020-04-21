@@ -6,41 +6,38 @@ Create monitoring environment (Zabbix + Elastic Stack) and connect it with Trito
 
 #### Rancher variables file
 
-Make sure your rancher variables file `rancher.vars` exists on folder `config/<env>`
+Make sure your rancher variables file `rancher.vars` exists on folder `config/<env>`:
 
-```
-RANCHER_ACCESS_KEY="rancher_access_key"
-RANCHER_SECRET_KEY="rancher_secret_key"
-RANCHER_URL="rancher_https_url"
-```
+    RANCHER_ACCESS_KEY="rancher_access_key"
+    RANCHER_SECRET_KEY="rancher_secret_key"
+    RANCHER_URL="rancher_https_url"
 
 ### Monitoring infrastructure setup and teardown
 
-Run setup script: `./monitoring/moniadm.sh` from within `mcp-setup` cloned repo.
+- Run setup script: `./monitoring/moniadm.sh` from within `mcp-setup` cloned repo.
 
-1.  Setup monitoring infrastructure
+### Setup monitoring infrastructure
 
-Run the script with `setup` command - `monitoring/moniadm.sh setup <cloud_name>`
-```
-./monitoring/moniadm.sh setup <aws|gpc|all>
-```
+- Run the script with `setup` command - `monitoring/moniadm.sh setup <cloud_name>`
+  
+   `./monitoring/moniadm.sh setup <aws|gpc|all>`
+  
+  Zabbix agent and filebeat ELK daemonsets will be applied to all cluster/s nodes.
 
-2. Verify that the Zabbix agent pod is running on every node in cluster.
+- Verify that the Zabbix agent pod is running on every node in cluster:
 
-Check the nodes:
+   `kubectl --kubeconfig ~/.kube/config.<aws|gcp> get pods -o wide`
+  
+- Verify that Filebeat pod is running on every node in cluster:
 
-```
-kubectl --kubeconfig ~/.kube/config.<aws|gcp> get pods -o wide
-```
+   `kubectl --kubeconfig ~/.kube/config.<aws|gcp> get pods -o wide --namespace=kube-system | grep filebeat`
+    
+    
+### Destroy monitoring infrastructure
 
-Zabbix agent daemonset will be applied to all cluster/s nodes.
+- Run the script with `destroy` command - `monitoring/moniadm.sh destroy <cloud_name>`
 
-3.  Destroy monitoring infrastructure
-
-Run the script with `destroy` command - `monitoring/moniadm.sh destroy <cloud_name>`
-```
-./monitoring/moniadm.sh destroy <aws|gpc|all>
-```
+   `./monitoring/moniadm.sh destroy <aws|gpc|all>`
 
 ### FAQ
 
