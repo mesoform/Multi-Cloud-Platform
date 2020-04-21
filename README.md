@@ -66,7 +66,7 @@ Default variables values are as follows:
     MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
     
 
-Exported variables on your shell will take precedence from the defined default values. 
+Exported variables on your shell will take precedence over the defined default values. 
 
 To check exported variables on current shell run the following command:
 
@@ -77,34 +77,36 @@ To check exported variables on current shell run the following command:
 - To deploy resources run `setup` command and specify cloud name (aws|gcp|all):
 
     
-   E.g:
+        E.g:
    
-    `./mcadm.sh setup aws`
+        ./mcadm.sh setup aws
 
 ### Cleanup
 
 - To remove all the resources deployed run the command:
 
-  E.g:
-    
-    `./mcadm.sh destroy manager`
+
+        E.g:
+        
+        ./mcadm.sh destroy manager
 
 ### Adding nodes to a cluster 
 
 - To add a node (etcd|control|worker) to an existing cluster run the add command:
 
-  E.g: add a new worker node to an AWS cluster:
         
-    `./mcadm.sh add wnode config/test/test-aws-cluster.yaml`
+        E.g: add a new worker node to an AWS cluster:
+        
+        ./mcadm.sh add wnode config/test/test-aws-cluster.yaml
 
 ### Removing nodes from an existing cluster 
 
 - To remove a node (etcd|control|worker) from a cluster run the destroy command:
 
-  E.g: remove a node from an AWS cluster:
-    
-    
-    `./mcadm.sh destroy node config/test/test-aws-cluster.yaml`
+        
+        E.g: remove a node from an AWS cluster:
+            
+        ./mcadm.sh destroy node config/test/test-aws-cluster.yaml
       
       
    A prompt will ask you which node to remove 
@@ -113,9 +115,10 @@ To check exported variables on current shell run the following command:
 
 - To get information about a manager or a cluster run the get command:
 
-  E.g: to get information about the cluster manager:
+        
+        E.g: to get information about the cluster manager:
     
-    `./mcadm.sh get manager`
+        ./mcadm.sh get manager
     
 ### FAQ
 

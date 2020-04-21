@@ -298,6 +298,11 @@ runSetup() {
   esac
 
   # Getting info about created manager
+  if [[ "${OPTION_1}" = "aws" ]]; then
+    MCP_BASE_MANAGER_CLOUD="aws"
+  elif [[ "${OPTION_1}" = "gcp" ]]; then
+    MCP_BASE_MANAGER_CLOUD="gcp"
+  fi
   getManager
 
   # Monitoring: Zabbix and ELK setup
