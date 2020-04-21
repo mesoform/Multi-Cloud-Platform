@@ -2,7 +2,7 @@
 
 set -e
 help() {
-   echo "Usage: ${SCRIPT_NAME} <command> [opitons]"
+   echo "Usage: ${SCRIPT_NAME} <command> [options]"
    echo ""
    echo "Commands:"
    echo "  setup    <cloud>    Setup monitoring/ELK infrastructure"
@@ -33,18 +33,8 @@ OPTION_1=$1
 set -u
 set -o pipefail
 
-ENV_PATH="${SCRIPT_DIR}/../env/default.vars"
-
-if [[ ! -f "${ENV_PATH}" ]]; then
-  echo "Environment file not found: ${ENV_PATH}"
-  help && exit
-fi
-
 # Load functions
 source "${SCRIPT_DIR}/../functions.sh"
-
-# Load default vars
-source ${SCRIPT_DIR}/../env/default.vars
 
 # Get local public IP address
 LOCAL_PUBLIC_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
@@ -54,7 +44,6 @@ export_env_vars
 
 verify_env_vars
 
-echo "CONTINUE"
 BIN="${SCRIPT_DIR}/../bin"
 mkdir -p ${BIN}
 
@@ -79,28 +68,25 @@ runSetup() {
 
     case "${OPTION_1}" in
       aws)
-        echo "AWS"
         TERRAFORM_ROOT_MODULE="zabbix-elk-aws-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
         echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       gcp)
-        echo "GCP"
         TERRAFORM_ROOT_MODULE="zabbix-elk-gcp-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
         echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       all)
-        echo "ALL"
         TERRAFORM_ROOT_MODULE="zabbix-elk-mcp"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
         echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       *)
-        echo "EXIT"
+        echo "Option not available"
         help && exit 1
         ;;
     esac
@@ -144,7 +130,7 @@ gends() {
 generateKubeconfig() {
 
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    RANCHER_VARS="${SCRIPT_DIR}/../config/rancher.vars"
+    RANCHER_VARS="${SCRIPT_DIR}/../config/${MCP_ENV}/rancher.vars"
     source "${RANCHER_VARS}"
     rancher_token="${RANCHER_ACCESS_KEY}:${RANCHER_SECRET_KEY}"
     rancher_clusters_api="${RANCHER_URL}/v3/clusters/"
@@ -232,7 +218,7 @@ installLinuxDependencies() {
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
         echo ""
-        echo "Getting the terraform ..."
+        echo "Getting terraform ..."
         echo ""
 
         cd ${BIN}
@@ -252,7 +238,7 @@ installLinuxDependencies() {
     # Install Mustache templates binary
     if [[ ! -e "${MO}" ]]; then
         echo ""
-        echo "Getting the mustache templates ..."
+        echo "Getting mustache templates ..."
         echo ""
 
         cd "${BIN}"
@@ -270,7 +256,7 @@ installDarwinDependencies() {
     # Install Terraform
     if [[ ! -e "${TERRAFORM}" ]]; then
         echo ""
-        echo "Getting the terraform ..."
+        echo "Getting terraform ..."
         echo ""
 
         cd ${BIN}
@@ -293,7 +279,7 @@ installDarwinDependencies() {
     # Install Mustache templates binary
     if [[ ! -e "${MO}" ]]; then
         echo ""
-        echo "Getting the mustache templates ..."
+        echo "Getting mustache templates ..."
         echo ""
 
         cd "${BIN}"
@@ -342,6 +328,4 @@ case "${COMMAND}" in
     ;;
 esac
 
-echo ""
-echo "MCP monitoring process completed: ${COMMAND}"
-echo ""
+echo -e "" && echo "MCP monitoring process completed: ${COMMAND}"

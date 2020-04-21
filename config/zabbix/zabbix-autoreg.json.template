@@ -1,0 +1,40 @@
+{
+    "jsonrpc": "2.0",
+    "method": "action.create",
+    "id":1,
+      "auth": "ZABBIX_TOKEN",
+    "params": {
+        "name": "Auto registration",
+        "eventsource": 2,
+        "status": 0,
+        "esc_period": 120,
+        "filter": {
+            "evaltype": 0,
+            "conditions": [
+                {
+                    "conditiontype": 24,
+                    "operator": 2,
+                    "value": "k8s-cluster"
+                }
+            ]
+        },
+        "operations": [
+              {
+                  "operationtype": 6,
+                  "optemplate": [
+                       {
+                         "templateid": "10001"
+                       }
+                 ]
+              },
+              {
+                  "operationtype": 4,
+                  "opgroup": [
+                       {
+                         "groupid": "2"
+                       }
+                 ]
+              }
+        ]
+     }
+}

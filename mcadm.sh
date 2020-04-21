@@ -8,29 +8,29 @@ help() {
   echo "Commands:"
   echo "  setup      Setup multi-cloud Kubernetes"
   echo "  get        Get information about manager or cluster"
-  echo "  add        Adding instances for existing cluster"
-  echo "  destroy    Destroy cluster manager and all associated clouds"
+  echo "  add        Add nodes to existing cluster"
+  echo "  destroy    Destroy cluster nodes or cluster manager and all associated clusters"
   echo ""
   echo ""
   echo "Setup command options:"
   echo "  aws        Setup cluster namager and Kubernetes cluster on AWS"
-  echo "  gcp        Setup cluster namager and Kubernetes cluster on Google cloud"
+  echo "  gcp        Setup cluster namager and Kubernetes cluster on GCP"
   echo "  all        Setup cluster namager and Kubernetes cluster on all supported clouds"
   echo ""
   echo "Get command options:"
   echo "  manager                      Get information about current manager"
-  echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config> / e.g: get cluster config/test/dev-aws-cluster.yaml "
+  echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config> / e.g: cluster config/test/dev-aws-cluster.yaml "
   echo ""
   echo "Add command options:"
-  echo "  cluster <cloud> <name>      Add cluster for default manager, name will be: <env>-<cloud>-<name> / e.g: add cluster aws cluster-1"
-  echo "  enode   <cluster_config>    Add etcd node to cluster, identified by <cluster_config>"
-  echo "  cnode   <cluster_config>    Add control node to cluster, identified by <cluster_config>"
-  echo "  wnode   <cluster_config>    Add worker node to cluster, identified by <cluster_config>"
+#  echo "  cluster <cloud> <name>      Add cluster for default manager, cluster name will be: <env>-<cloud>-<name> / e.g: add cluster aws cluster-1"
+  echo "  enode   <cluster_config>    Add etcd node to cluster, identified by <cluster_config> / e.g: enode config/test/dev-aws-cluster.yaml"
+  echo "  cnode   <cluster_config>    Add control node to cluster, identified by <cluster_config> / e.g: cnode config/test/dev-aws-cluster.yaml"
+  echo "  wnode   <cluster_config>    Add worker node to cluster, identified by <cluster_config> / e.g: wnode config/test/dev-aws-cluster.yaml"
   echo ""
   echo "Destroy command options:"
-  echo "  manager                      Destroy current manager and associated clusters"
-  echo "  cluster <cluster_config>     Destroy cluster, identified by <cluster_config>"
-  echo "  node    <cluster_config>     Select and destroy node in cluster, identified by <cluster_config>"
+  echo "  manager                      Destroy current manager and all associated clusters"
+#  echo "  cluster <cluster_config>     Destroy cluster, identified by <cluster_config> / e.g: cluster config/test/dev-aws-cluster.yaml"
+  echo "  node    <cluster_config>     Select and destroy node in cluster, identified by <cluster_config> / e.g: node config/test/dev-aws-cluster.yaml"
   echo ""
 }
 
@@ -48,22 +48,12 @@ OPTION_1=$1
 shift
 
 OPTION_2=$1
-shift
+#shift
 
-OPTION_3=$1
-
-ENV_PATH="${SCRIPT_DIR}/env/default.vars"
-
-if [[ ! -f "${ENV_PATH}" ]]; then
-  echo "Environment file not found: ${ENV_PATH}"
-  help && return
-fi
+#OPTION_3=$1
 
 # Load functions
 source "${SCRIPT_DIR}/functions.sh"
-
-# Load default vars
-source ${SCRIPT_DIR}/env/default.vars
 
 # Get local public IP address
 LOCAL_PUBLIC_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
@@ -98,7 +88,6 @@ fi
 export SOURCE_REF=master
 
 # Export config vars
-export ENV_PATH=$ENV_PATH
 export CONFIG_DIR=$CONFIG_DIR
 export TEMPLATES_DIR=$TEMPLATES_DIR
 export TERRAFORM=$TERRAFORM
@@ -107,11 +96,8 @@ export MONIADM_ACTION=$MONIADM_ACTION
 export TK8S=$TK8S
 export MO=$MO
 
-
-#source_environment
-
-#set -e
-#set -u
+set -e
+set -u
 
 ##
 ## Install section
@@ -282,13 +268,13 @@ installDarwinDependencies() {
 
 runMoniadm() {
   if [[ -f ${TERRAFORM_MON}/zabbix-elk-aws-only/terraform.tfvars ]]; then
-    echo "AWS"
+    echo "Found terraform.tfvars for AWS setup"
     ${SCRIPT_DIR}/monitoring/moniadm.sh ${MONIADM_ACTION} aws
   elif [[ -f ${TERRAFORM_MON}/zabbix-elk-gcp-only/terraform.tfvars ]]; then
-    echo "GCP"
+    echo "Found terraform.tfvars for GCP setup"
     ${SCRIPT_DIR}/monitoring/moniadm.sh ${MONIADM_ACTION} gcp
   elif [[ -f ${TERRAFORM_MON}/zabbix-elk-mcp/terraform.tfvars ]]; then
-    echo "ALL"
+    echo "Found terraform.tfvars for MCP setup"
     ${SCRIPT_DIR}/monitoring/moniadm.sh ${MONIADM_ACTION} all
   else
     echo "File terraform.tfvars not found"
@@ -306,6 +292,7 @@ runSetup() {
     ;;
 
   *)
+    echo "Option not available"
     help && exit 1
     ;;
   esac
@@ -313,7 +300,7 @@ runSetup() {
   # Getting info about created manager
   getManager
 
-  # Zabbix and ELK setup
+  # Monitoring: Zabbix and ELK setup
   ${SCRIPT_DIR}/monitoring/moniadm.sh setup ${OPTION_1}
 
 }
@@ -336,26 +323,20 @@ runGet() {
 
 runAdd() {
   case "${OPTION_1}" in
-  cluster)
-    addCluster "${OPTION_2}" "${OPTION_3}"
-    ;;
+#  cluster)
+#    addCluster "${OPTION_2}" "${OPTION_3}"
+#    ;;
 
   enode)
     addEtcdNode "${OPTION_2}"
-    MONIADM_ACTION="setup"
-    runMoniadm
     ;;
 
   cnode)
     addControlNode "${OPTION_2}"
-    MONIADM_ACTION="setup"
-    runMoniadm
     ;;
 
   wnode)
     addWokerNode "${OPTION_2}"
-    MONIADM_ACTION="setup"
-    runMoniadm
     ;;
 
   *)
@@ -372,9 +353,9 @@ runDestroy() {
     destroyManager
     ;;
 
-  cluster)
-    destroyCluster "${OPTION_2}"
-    ;;
+#  cluster)
+#    destroyCluster "${OPTION_2}"
+#    ;;
 
   node)
     destroyNode "${OPTION_2}"
@@ -443,9 +424,9 @@ getManager() {
   export RANCHER_SECRET_KEY=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_secret_key)
   export RANCHER_URL=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_url)
 
-  echo "RANCHER_ACCESS_KEY=\"$RANCHER_ACCESS_KEY\"" > ${CONFIG_DIR}/rancher.vars
-  echo "RANCHER_SECRET_KEY=\"$RANCHER_SECRET_KEY\"" >> ${CONFIG_DIR}/rancher.vars
-  echo "RANCHER_URL=\"$RANCHER_URL\"" >> ${CONFIG_DIR}/rancher.vars
+  echo "RANCHER_ACCESS_KEY=\"$RANCHER_ACCESS_KEY\"" > ${CONFIG_DIR}/${MCP_ENV}/rancher.vars
+  echo "RANCHER_SECRET_KEY=\"$RANCHER_SECRET_KEY\"" >> ${CONFIG_DIR}/${MCP_ENV}/rancher.vars
+  echo "RANCHER_URL=\"$RANCHER_URL\"" >> ${CONFIG_DIR}/${MCP_ENV}/rancher.vars
   echo ""
 }
 
@@ -568,7 +549,7 @@ function destroyManager() {
   ${TK8S} destroy manager --non-interactive \
     --config "${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
 
-  rm -rf "${CONFIG_DIR:?}/${MCP_ENV:?}/" "${CONFIG_DIR}/rancher.vars"
+  rm -rf "${CONFIG_DIR:?}/${MCP_ENV:?}/"
 }
 
 function destroyCluster() {
@@ -605,6 +586,11 @@ function destroyNode() {
     --config "${CONFIG_DIR}/${MCP_ENV}/node-info.yaml"
 }
 
+
+# ####################################################
+# Install Dependencies
+# ####################################################
+
 installDependencies
 
 # ####################################################
@@ -613,10 +599,7 @@ installDependencies
 
 case "${COMMAND}" in
 setup)
-  echo "runSetup"
-  echo "--------"
   print_env_vars
-
   runSetup
   ;;
 
@@ -626,6 +609,8 @@ get)
 
 add)
   runAdd
+  MONIADM_ACTION="setup"
+  runMoniadm
   ;;
 
 destroy)
@@ -636,7 +621,5 @@ destroy)
   help && exit 1
   ;;
 esac
-#
-echo ""
-echo "MCP admin process completed: ${COMMAND}"
-echo ""
+
+echo -n "" && echo "MCP admin process completed: ${COMMAND}"
