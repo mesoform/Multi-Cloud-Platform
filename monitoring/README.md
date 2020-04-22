@@ -11,6 +11,7 @@ Make sure your rancher variables file `rancher.vars` exists on folder `config/<e
     RANCHER_ACCESS_KEY="rancher_access_key"
     RANCHER_SECRET_KEY="rancher_secret_key"
     RANCHER_URL="rancher_https_url"
+    RANCHER_CLOUD="xyz"
 
 ### Monitoring infrastructure setup and teardown
 

@@ -3,7 +3,7 @@
 set -o pipefail
 
 help() {
-  echo "Usage: ${SCRIPT_NAME} <command> [opitons]"
+  echo "Usage: ${SCRIPT_NAME} <command> [options]"
   echo ""
   echo "Commands:"
   echo "  setup      Setup multi-cloud Kubernetes"
@@ -67,6 +67,7 @@ verify_env_vars
 CONFIG_DIR="${SCRIPT_DIR}/config"
 mkdir -p "${CONFIG_DIR}/${MCP_ENV}"
 TEMPLATES_DIR="${CONFIG_DIR}/templates"
+RANCHER_VARS="${CONFIG_DIR}/${MCP_ENV}/rancher.vars"
 
 # Binaries directory
 BIN="${SCRIPT_DIR}/bin"
@@ -90,6 +91,7 @@ export SOURCE_REF=master
 # Export config vars
 export CONFIG_DIR=$CONFIG_DIR
 export TEMPLATES_DIR=$TEMPLATES_DIR
+export RANCHER_VARS=$RANCHER_VARS
 export TERRAFORM=$TERRAFORM
 export TERRAFORM_MON=$TERRAFORM_MON
 export MONIADM_ACTION=$MONIADM_ACTION
@@ -381,7 +383,7 @@ runDestroy() {
 
 setupManager() {
   local current_cloud=$1
-  [[ -z "${current_cloud}" ]] && echo "Setup manager: Cloud name is required" && return
+  [[ -z "${current_cloud}" ]] && echo "Setup manager: Cloud name is required" && exit 1
 
   # Select cloud for manager
   [[ "${current_cloud}" == "all" ]] && current_cloud="${MCP_BASE_MANAGER_CLOUD}"
@@ -398,7 +400,7 @@ setupManager() {
 
 setupCluster() {
   local current_cloud=$1
-  [[ -z "${current_cloud}" ]] && echo "Setup cluster: Cloud name is required" && return
+  [[ -z "${current_cloud}" ]] && echo "Setup cluster: Cloud name is required" && exit 1
 
   # Select cloud for cluster
   [[ "${current_cloud}" == "all" ]] && current_cloud="*"
@@ -418,6 +420,11 @@ setupCluster() {
 # :::::::::: Get information functions
 
 getManager() {
+
+  if [[ -f ${RANCHER_VARS} ]]; then
+    source ${RANCHER_VARS}
+    MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
+  fi
   # Getting info about created manager
   export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
@@ -429,15 +436,16 @@ getManager() {
   export RANCHER_SECRET_KEY=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_secret_key)
   export RANCHER_URL=$(${TERRAFORM} output -module=cluster-manager -state="$HOME/.triton-kubernetes/${MCP_MANAGER_NAME}/terraform.tfstate" rancher_url)
 
-  echo "RANCHER_ACCESS_KEY=\"$RANCHER_ACCESS_KEY\"" > ${CONFIG_DIR}/${MCP_ENV}/rancher.vars
-  echo "RANCHER_SECRET_KEY=\"$RANCHER_SECRET_KEY\"" >> ${CONFIG_DIR}/${MCP_ENV}/rancher.vars
-  echo "RANCHER_URL=\"$RANCHER_URL\"" >> ${CONFIG_DIR}/${MCP_ENV}/rancher.vars
+  echo "RANCHER_ACCESS_KEY=\"$RANCHER_ACCESS_KEY\"" > ${RANCHER_VARS}
+  echo "RANCHER_SECRET_KEY=\"$RANCHER_SECRET_KEY\"" >> ${RANCHER_VARS}
+  echo "RANCHER_URL=\"$RANCHER_URL\"" >> ${RANCHER_VARS}
+  echo "RANCHER_CLOUD=\"$MCP_BASE_MANAGER_CLOUD\"" >> ${RANCHER_VARS}
   echo ""
 }
 
 getCluster() {
   local cluster_config=$1
-  [[ ! -e "${cluster_config}" ]] && echo "Get cluster: Config file is required" && return
+  [[ ! -e "${cluster_config}" ]] && echo "Get cluster: Config file is required" && exit 1
 
   echo ""
   echo "Getting information about cluster"
@@ -456,10 +464,10 @@ getCluster() {
 
 addCluster() {
   local current_cloud=$1
-  [[ -z "${current_cloud}" ]] && echo "Add cluster: Cloud name is required" && return
+  [[ -z "${current_cloud}" ]] && echo "Add cluster: Cloud name is required" && exit 1
 
   local cluster_name=$2
-  [[ -z "${cluster_name}" ]] && echo "Add cluster: Cluster name is required" && return
+  [[ -z "${cluster_name}" ]] && echo "Add cluster: Cluster name is required" && exit 1
 
   local cloud_list=()
   # Select cloud for cluster
@@ -521,7 +529,7 @@ addWokerNode() {
 
 addNode() {
   local cluster_config=$1
-  [[ ! -e "${cluster_config}" ]] && echo "Add node: Cluster config file is required" && return
+  [[ ! -e "${cluster_config}" ]] && echo "Add node: Cluster config file is required" && exit 1
 
   echo ""
   echo "Adding ${MCP_NODE_TYPE} node"
@@ -547,6 +555,8 @@ function destroyManager() {
   echo "Destroying manager"
   echo ""
 
+  source ${RANCHER_VARS} && MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
+
   echo "Triton Kubernetes version: $(${TK8S} version)"
   export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
   ${MO} "${TEMPLATES_DIR}/manager-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
@@ -559,11 +569,13 @@ function destroyManager() {
 
 function destroyCluster() {
   local cluster_config=$1
-  [[ ! -e "${cluster_config}" ]] && echo "Destroy cluster: Config file is required" && return
+  [[ ! -e "${cluster_config}" ]] && echo "Destroy cluster: Config file is required" && exit 1
 
   echo ""
   echo "Destroying cluster"
   echo ""
+
+  source ${RANCHER_VARS} && MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
   export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
@@ -576,11 +588,13 @@ function destroyCluster() {
 
 function destroyNode() {
   local cluster_config=$1
-  [[ ! -e "${cluster_config}" ]] && echo "Destroy node: Config file is required" && return
+  [[ ! -e "${cluster_config}" ]] && echo "Destroy node: Config file is required" && exit 1
 
   echo ""
   echo "Destroying node"
   echo ""
+
+  source ${RANCHER_VARS} && MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
   export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
@@ -593,18 +607,13 @@ function destroyNode() {
 
 
 # ####################################################
-# Install Dependencies
-# ####################################################
-
-installDependencies
-
-# ####################################################
 # Command selector
 # ####################################################
 
 case "${COMMAND}" in
 setup)
   print_env_vars
+  installDependencies
   runSetup
   ;;
 

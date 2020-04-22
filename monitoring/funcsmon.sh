@@ -2,12 +2,12 @@
 
 renderConfig() {
     local config_template=$1
-    [[ -z "${config_template}" ]] && echo "Config template pathname is required" && return
+    [[ -z "${config_template}" ]] && echo "Config template pathname is required" && exit 1
     ${MO} "${config_template}"
 }
 
 generateDaemonsets() {
-    [[ -z "${TEMPLATES_DIR}" ]] && echo "Set the templates dir value" && return
+    [[ -z "${TEMPLATES_DIR}" ]] && echo "Set the templates dir value" && exit 1
     export ZABBIX_PRIVATE_IP=$(${TERRAFORM} output zabbix_private_ip)
     export ELK_PRIVATE_IP=$(${TERRAFORM} output elk_private_ip)
 

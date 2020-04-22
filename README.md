@@ -53,8 +53,8 @@ Default variables values are as follows:
     MCP_CONTROL_NODE_COUNT=1                       # number of control nodes per cluster
     MCP_WORKER_NODE_COUNT=1                        # number of worker nodes per cluster
     # AWS
-    MCP_AWS_ACCESS_KEY=""                          # aws platform access key. E.g. MCP_AWS_ACCESS_KEY=***************PZAW
-    MCP_AWS_SECRET_KEY=""                          # aws platform secret key. E.g. MCP_AWS_SECRET_KEY=************************************escd
+    MCP_AWS_ACCESS_KEY=""                          # aws platform access key. E.g. MCP_AWS_ACCESS_KEY=AKIB6TGAWR66MFOPZAW
+    MCP_AWS_SECRET_KEY=""                          # aws platform secret key. E.g. MCP_AWS_SECRET_KEY=bX4r02gt7OPDfv5lcdueKJdXSKcNNT9rklczescd
     MCP_AWS_DEFAULT_REGION="eu-west-2"             # aws default region
     MCP_AWS_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"    # auth public rsa key
     MCP_AWS_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
@@ -128,7 +128,7 @@ To check exported variables on current shell run the following command:
 
     E.g:
     
-    `rancher_access_key = token-1abcd`
+    `rancher_access_key = token-1abcd` 
     `rancher_secret_key = xyz1xyz2xyz`
     `rancher_url = https://3.4.1.2`
 

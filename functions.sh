@@ -55,7 +55,7 @@ verify_env_vars() {
 
   manager | cluster | node | enode | cnode | wnode)
     if [[ -z "${OPTION_2}" ]]; then
-      echo "Continue"
+      echo "Verifying..."
     elif [[ ${OPTION_2} == *"aws"* ]]; then
       [[ -z "${MCP_AWS_ACCESS_KEY}" ]] && echo "No AWS access key selected" && exit 1
       [[ -z "${MCP_AWS_SECRET_KEY}" ]] && echo "No AWS secret key selected" && exit 1
@@ -130,25 +130,25 @@ export_env_vars() {
 
 renderManagerConfig() {
     local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Manager config: Cloud name is required" && return
+    [[ -z "${current_cloud}" ]] && echo "Manager config: Cloud name is required" && exit 1
     ${MO} "${TEMPLATES_DIR}/${current_cloud}-manager-template.yaml"
 }
 
 renderClusterConfig() {
     local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Cluster config: Cloud name is required" && return
+    [[ -z "${current_cloud}" ]] && echo "Cluster config: Cloud name is required" && exit 1
     ${MO} "${TEMPLATES_DIR}/${current_cloud}-cluster-template.yaml"
 }
 
 renderNodeConfig() {
     local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Node config: Cloud name is required" && return
+    [[ -z "${current_cloud}" ]] && echo "Node config: Cloud name is required" && exit 1
     ${MO} "${TEMPLATES_DIR}/${current_cloud}-node-template.yaml"
 }
 
 generateConfiguration() {
     local current_cloud=$1
-    [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && return
+    [[ -z "${current_cloud}" ]] && echo "Configuration: Cloud name is required" && exit 1
 
 
     set -a
@@ -165,7 +165,7 @@ generateConfiguration() {
       ;;
 
     *)
-      echo "Unsupported cloud: '${current_cloud}'" && return
+      echo "Unsupported cloud: '${current_cloud}'" && exit 1
       ;;
     esac
 
