@@ -1,3 +1,4 @@
-RANCHER_ACCESS_KEY="replace_with_access_key"
-RANCHER_SECRET_KEY="replace_with_secret_key"
-RANCHER_URL="replace_with_https_url"
+RANCHER_ACCESS_KEY="rancher_access_key"
+RANCHER_SECRET_KEY="rancher_secret_key"
+RANCHER_URL="rancher_https_url"
+RANCHER_CLOUD="rancher_manager_cloud"

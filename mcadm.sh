@@ -18,19 +18,19 @@ help() {
   echo "  all        Setup cluster namager and Kubernetes cluster on all supported clouds"
   echo ""
   echo "Get command options:"
-  echo "  manager                      Get information about current manager"
-  echo "  cluster <cluster_config>     Get information about cluster, identified by <cluster_config> / e.g: cluster config/test/dev-aws-cluster.yaml "
+  echo "  manager                    Get information about current manager"
+  echo "  cluster <cluster_config>   Get information about cluster, identified by <cluster_config> / e.g: cluster config/test/dev-aws-cluster.yaml "
   echo ""
   echo "Add command options:"
 #  echo "  cluster <cloud> <name>      Add cluster for default manager, cluster name will be: <env>-<cloud>-<name> / e.g: add cluster aws cluster-1"
-  echo "  enode   <cluster_config>    Add etcd node to cluster, identified by <cluster_config> / e.g: enode config/test/dev-aws-cluster.yaml"
-  echo "  cnode   <cluster_config>    Add control node to cluster, identified by <cluster_config> / e.g: cnode config/test/dev-aws-cluster.yaml"
-  echo "  wnode   <cluster_config>    Add worker node to cluster, identified by <cluster_config> / e.g: wnode config/test/dev-aws-cluster.yaml"
+  echo "  enode <cluster_config>     Add etcd node to cluster, identified by <cluster_config> / e.g: enode config/test/dev-aws-cluster.yaml"
+  echo "  cnode <cluster_config>     Add control node to cluster, identified by <cluster_config> / e.g: cnode config/test/dev-aws-cluster.yaml"
+  echo "  wnode <cluster_config>     Add worker node to cluster, identified by <cluster_config> / e.g: wnode config/test/dev-aws-cluster.yaml"
   echo ""
   echo "Destroy command options:"
-  echo "  manager                      Destroy current manager and all associated clusters"
+  echo "  manager                    Destroy current manager and all associated clusters"
 #  echo "  cluster <cluster_config>     Destroy cluster, identified by <cluster_config> / e.g: cluster config/test/dev-aws-cluster.yaml"
-  echo "  node    <cluster_config>     Select and destroy node in cluster, identified by <cluster_config> / e.g: node config/test/dev-aws-cluster.yaml"
+  echo "  node <cluster_config>      Select and destroy node in cluster, identified by <cluster_config> / e.g: node config/test/dev-aws-cluster.yaml"
   echo ""
 }
 
@@ -452,7 +452,7 @@ getCluster() {
   echo ""
 
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME=$(yq r "${cluster_config}" 'cluster_manager')
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/cluster-info.yaml"
 
@@ -575,10 +575,8 @@ function destroyCluster() {
   echo "Destroying cluster"
   echo ""
 
-  source ${RANCHER_VARS} && MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
-
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME=$(yq r "${cluster_config}" 'cluster_manager')
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/cluster-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/cluster-info.yaml"
 
@@ -594,10 +592,8 @@ function destroyNode() {
   echo "Destroying node"
   echo ""
 
-  source ${RANCHER_VARS} && MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
-
   echo "Triton Kubernetes version: $(${TK8S} version)"
-  export MCP_MANAGER_NAME="${MCP_ENV}-${MCP_BASE_MANAGER_CLOUD}-${MCP_BASE_MANAGER_NAME}"
+  export MCP_MANAGER_NAME=$(yq r "${cluster_config}" 'cluster_manager')
   export MCP_CLUSTER_NAME=$(yq r "${cluster_config}" 'name')
   ${MO} "${TEMPLATES_DIR}/node-info-template.yaml" >"${CONFIG_DIR}/${MCP_ENV}/node-info.yaml"
 

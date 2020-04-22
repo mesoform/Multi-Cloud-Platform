@@ -105,9 +105,9 @@ export_env_vars() {
   export MCP_WORKER_NODE_COUNT=${MCP_WORKER_NODE_COUNT:-1}
   ### AWS
   # aws platform access key
-  export MCP_AWS_ACCESS_KEY=${MCP_AWS_ACCESS_KEY}
+  export MCP_AWS_ACCESS_KEY=${MCP_AWS_ACCESS_KEY:-}
   # aws platform secret key
-  export MCP_AWS_SECRET_KEY=${MCP_AWS_SECRET_KEY}
+  export MCP_AWS_SECRET_KEY=${MCP_AWS_SECRET_KEY:-}
   # aws default region
   export MCP_AWS_DEFAULT_REGION=${MCP_AWS_DEFAULT_REGION:-eu-west-2}
   # auth public rsa key
@@ -116,9 +116,9 @@ export_env_vars() {
   export MCP_AWS_PRIVATE_KEY_PATH=${MCP_AWS_PRIVATE_KEY_PATH:-~/.ssh/id_rsa}
   ### GCP
   # gcp project id
-  export MCP_GCP_PROJECT_ID=${MCP_GCP_PROJECT_ID}
+  export MCP_GCP_PROJECT_ID=${MCP_GCP_PROJECT_ID:-}
   # gcp service account credentials
-  export MCP_GCP_PATH_TO_CREDENTIALS=${MCP_GCP_PATH_TO_CREDENTIALS}
+  export MCP_GCP_PATH_TO_CREDENTIALS=${MCP_GCP_PATH_TO_CREDENTIALS:-}
   # gcp default region
   export MCP_GCP_DEFAULT_REGION=${MCP_GCP_DEFAULT_REGION:-europe-west2}
   # auth public rsa key

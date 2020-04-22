@@ -22,7 +22,6 @@ SCRIPT_NAME=$0
 
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-echo "SCRIPT_DIR: ${SCRIPT_DIR}"
 
 COMMAND=$1
 [[ -z "${COMMAND}" ]] && help && exit 1
@@ -70,19 +69,16 @@ runSetup() {
       aws)
         TERRAFORM_ROOT_MODULE="zabbix-elk-aws-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
-        echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       gcp)
         TERRAFORM_ROOT_MODULE="zabbix-elk-gcp-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
-        echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       all)
         TERRAFORM_ROOT_MODULE="zabbix-elk-mcp"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
-        echo "TERRAFORM_ROOT:" ${TERRAFORM_ROOT}
         ;;
 
       *)
