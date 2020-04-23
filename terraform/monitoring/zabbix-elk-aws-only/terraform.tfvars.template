@@ -1,0 +1,17 @@
+name = "zabbix-elk"
+
+aws_access_key = "{{MCP_AWS_ACCESS_KEY}}"
+aws_secret_key = "{{MCP_AWS_SECRET_KEY}}"
+aws_key_name = "{{MCP_ENV}}-{{MCP_BASE_MANAGER_CLOUD}}-{{MCP_BASE_CLUSTER_NAME}}_public_key_zabbix"
+aws_public_key_path = "{{MCP_AWS_PUBLIC_KEY_PATH}}"
+aws_private_key_path = "{{MCP_AWS_PRIVATE_KEY_PATH}}"
+aws_k8s_cluster_name = "{{MCP_ENV}}-aws-{{MCP_BASE_CLUSTER_NAME}}"
+
+aws_region = "eu-west-2"
+aws_vpc_cidr = "10.64.0.0/16"
+aws_subnet_cidr = "10.64.2.0/24"
+aws_ami_id = "ami-0be057a22c63962cb"
+aws_instance_type = "t2.micro"
+aws_ssh_user = "ubuntu"
+
+local_public_ip="{{LOCAL_PUBLIC_IP}}/32"

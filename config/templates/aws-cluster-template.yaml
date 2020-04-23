@@ -14,7 +14,7 @@ k8s_registry_password: ""
 # set AWS access and secret keys
 aws_access_key: {{MCP_AWS_ACCESS_KEY}}
 aws_secret_key: {{MCP_AWS_SECRET_KEY}}
-aws_region: eu-west-2
+aws_region: {{MCP_AWS_DEFAULT_REGION}}
 aws_vpc_cidr: 172.22.0.0/16
 aws_subnet_cidr: 172.22.1.0/24
 aws_public_key_path: {{MCP_AWS_PUBLIC_KEY_PATH}}
@@ -29,20 +29,20 @@ nodes:
     rancher_host_label: etcd
     hostname: {{MCP_ETCD_NODE_NAME}}
     aws_ami_id: ami-04606ba5d5fb731cc
-    aws_instance_type: t2.small
+    aws_instance_type: t2.medium
     ebs_volume_iops: 100
     ebs_volume_size: 10
   - node_count: {{MCP_CONTROL_NODE_COUNT}}
     rancher_host_label: control
     hostname: {{MCP_CONTROL_NODE_NAME}}
     aws_ami_id: ami-04606ba5d5fb731cc
-    aws_instance_type: t2.small
+    aws_instance_type: t2.medium
     ebs_volume_iops: 100
     ebs_volume_size: 10
   - node_count: {{MCP_WORKER_NODE_COUNT}}
     rancher_host_label: worker
     hostname: {{MCP_WORKER_NODE_NAME}}
     aws_ami_id: ami-04606ba5d5fb731cc
-    aws_instance_type: t2.small
+    aws_instance_type: t2.medium
     ebs_volume_iops: 100
     ebs_volume_size: 10

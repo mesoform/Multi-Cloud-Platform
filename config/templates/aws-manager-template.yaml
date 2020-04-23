@@ -7,12 +7,12 @@ private_registry_username: ""
 private_registry_password: ""
 rancher_server_image: ""
 rancher_agent_image: ""
-# set password for rancher 'admin' user
-rancher_admin_password: {{MCP_RANCHER_ADMIN_PASSWORD}}
+# set password for rancher admin user
+rancher_admin_password: {{MCP_RANCHER_ADMIN_PWD}}
 # set AWS access and secret keys
 aws_access_key: {{MCP_AWS_ACCESS_KEY}}
 aws_secret_key: {{MCP_AWS_SECRET_KEY}}
-aws_region: eu-west-2
+aws_region: {{MCP_AWS_DEFAULT_REGION}}
 aws_vpc_cidr: 10.0.0.0/16
 aws_subnet_cidr: 10.0.2.0/24
 aws_public_key_path: {{MCP_AWS_PUBLIC_KEY_PATH}}
@@ -21,4 +21,4 @@ aws_key_name: {{MCP_AWS_MANAGER_KEY_NAME}}
 aws_ssh_user: ubuntu
 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190501 - ami-04606ba5d5fb731cc
 aws_ami_id: ami-04606ba5d5fb731cc
-aws_instance_type: t2.small
+aws_instance_type: t2.large

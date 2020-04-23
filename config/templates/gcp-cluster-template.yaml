@@ -12,12 +12,12 @@ k8s_registry: ""
 k8s_registry_username: ""
 k8s_registry_password: ""
 gcp_path_to_credentials: {{MCP_GCP_PATH_TO_CREDENTIALS}}
-gcp_compute_region: europe-west2
+gcp_compute_region: {{MCP_GCP_DEFAULT_REGION}}
 nodes:
   - node_count: {{MCP_ETCD_NODE_COUNT}}
     rancher_host_label: etcd
     hostname: {{MCP_ETCD_NODE_NAME}}
-    gcp_instance_zone: europe-west2-b
+    gcp_instance_zone: {{MCP_GCP_DEFAULT_REGION}}-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
     gcp_public_key_path: {{MCP_GCP_PUBLIC_KEY_PATH}}
@@ -26,7 +26,7 @@ nodes:
   - node_count: {{MCP_CONTROL_NODE_COUNT}}
     rancher_host_label: control
     hostname: {{MCP_CONTROL_NODE_NAME}}
-    gcp_instance_zone: europe-west2-b
+    gcp_instance_zone: {{MCP_GCP_DEFAULT_REGION}}-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
     gcp_public_key_path: {{MCP_GCP_PUBLIC_KEY_PATH}}
@@ -35,7 +35,7 @@ nodes:
   - node_count: {{MCP_WORKER_NODE_COUNT}}
     rancher_host_label: worker
     hostname: {{MCP_WORKER_NODE_NAME}}
-    gcp_instance_zone: europe-west2-b
+    gcp_instance_zone: {{MCP_GCP_DEFAULT_REGION}}-b
     gcp_machine_type: g1-small
     gcp_image: ubuntu-1604-xenial-v20190430
     gcp_public_key_path: {{MCP_GCP_PUBLIC_KEY_PATH}}
