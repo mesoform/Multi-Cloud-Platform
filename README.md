@@ -53,8 +53,8 @@ Default variables values are as follows:
     MCP_CONTROL_NODE_COUNT=1                       # number of control nodes per cluster
     MCP_WORKER_NODE_COUNT=1                        # number of worker nodes per cluster
     # AWS
-    MCP_AWS_ACCESS_KEY=""                          # aws platform access key. E.g. MCP_AWS_ACCESS_KEY=AKIB6TGAWR66MFOPZAW
-    MCP_AWS_SECRET_KEY=""                          # aws platform secret key. E.g. MCP_AWS_SECRET_KEY=bX4r02gt7OPDfv5lcdueKJdXSKcNNT9rklczescd
+    MCP_AWS_ACCESS_KEY=""                          # aws platform access key. E.g. MCP_AWS_ACCESS_KEY=***************PZAW
+    MCP_AWS_SECRET_KEY=""                          # aws platform secret key. E.g. MCP_AWS_SECRET_KEY=************************************escd
     MCP_AWS_DEFAULT_REGION="eu-west-2"             # aws default region
     MCP_AWS_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"    # auth public rsa key
     MCP_AWS_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
@@ -66,74 +66,73 @@ Default variables values are as follows:
     MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
     
 
-Exported variables on your shell will take precedence over the defined default values. 
+Exported variables on your shell will take precedence from the defined default values. 
 
-To check exported variables on current shell run the following command:
 
-    env | grep MCP
+To check exported variables on current shell run the following command: `env | grep MCP`
+
     
 ### Deployment
 
 - To deploy resources run `setup` command and specify cloud name (aws|gcp|all):
 
     
-        E.g:
-   
-        ./mcadm.sh setup aws
+     E.g: `./mcadm.sh setup aws`
 
 ### Cleanup
 
-- To remove all the resources deployed run the command:
+- To remove all the resources deployed run the `destroy` command:
 
-
-        E.g:
-        
-        ./mcadm.sh destroy manager
+      E.g: `./mcadm.sh destroy manager`
 
 ### Adding nodes to a cluster 
 
 - To add a node (etcd|control|worker) to an existing cluster run the add command:
 
+      E.g: add a new worker node to an AWS cluster:
         
-        E.g: add a new worker node to an AWS cluster:
-        
-        ./mcadm.sh add wnode config/test/test-aws-cluster.yaml
+      `./mcadm.sh add wnode config/test/test-aws-cluster.yaml`
 
 ### Removing nodes from an existing cluster 
 
 - To remove a node (etcd|control|worker) from a cluster run the destroy command:
 
+      E.g: remove a node from an AWS cluster:
         
-        E.g: remove a node from an AWS cluster:
-            
-        ./mcadm.sh destroy node config/test/test-aws-cluster.yaml
+      `./mcadm.sh destroy node config/test/test-aws-cluster.yaml`
       
       
-   A prompt will ask you which node to remove 
+     A prompt will ask you which node to remove 
   
 ### Getting information about manager or cluster 
 
 - To get information about a manager or a cluster run the get command:
 
-        
-        E.g: to get information about the cluster manager:
+      E.g: to get information about the cluster manager:
     
-        ./mcadm.sh get manager
+      `./mcadm.sh get manager`
     
 ### FAQ
 
-- Run `./mcadm.sh help` to see details about script usage.
+- Run `./mcadm.sh help` to see details about script usage
+
 
 - The information about the Kubernetes Cluster Manager will be shown in the console output. Rancher manager UI user: admin
-
-    E.g:
+      
+      E.g:
     
-    `rancher_access_key = token-1abcd` 
-    `rancher_secret_key = xyz1xyz2xyz`
-    `rancher_url = https://3.4.1.2`
+      `rancher_access_key = token-1abcd`
+
+      `rancher_secret_key = xyz1xyz2xyz`
+      
+      `rancher_url = https://3.4.1.2`
+        
+
 
 - The Zabbix Web Frontend can be accessed on a browser using the public Zabbix Server IP. User: Admin
 
+
 - Kibana UI can be accessed on a browser using the public ELK Server IP and port 5601
+
 
 - A multi-cloud setup on both AWS and GCP currently only allows the creation of Zabbix and Elastic Stack servers on AWS. 
