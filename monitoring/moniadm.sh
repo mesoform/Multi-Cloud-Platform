@@ -36,7 +36,7 @@ set -o pipefail
 source "${SCRIPT_DIR}/../functions.sh"
 
 # Get local public IP address
-LOCAL_PUBLIC_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+LOCAL_PUBLIC_IP=$(dig +short -4 myip.opendns.com @resolver1.opendns.com)
 export LOCAL_PUBLIC_IP=$LOCAL_PUBLIC_IP
 
 export_env_vars
