@@ -188,7 +188,7 @@ registerClusterNodes() {
 
     zabbix_token=$(curl -ks -H "Content-Type: application/json" -X POST --data @${zabbix_token_json} ${zabbix_api} | jq -r .result)
 
-    sed -i "s/ZABBIX_TOKEN/${zabbix_token}/" ${zabbix_autoreg_json}
+    sed -i'.bck' "s/ZABBIX_TOKEN/${zabbix_token}/" ${zabbix_autoreg_json}
     curl -k -H "Content-Type: application/json" -X POST --data @${zabbix_autoreg_json} ${zabbix_api}
 }
 
@@ -312,7 +312,8 @@ case "${COMMAND}" in
            "${TERRAFORM_ROOT}/terraform.tfstate" \
            "${TERRAFORM_ROOT}/terraform.tfstate.backup" \
            "${TERRAFORM_ROOT}/terraform.tfvars" \
-           "${ZABBIX_RESOURCES}/zabbix-autoreg.json"
+           "${ZABBIX_RESOURCES}/zabbix-autoreg.json" \
+           "${ZABBIX_RESOURCES}/zabbix-autoreg.json.bck"
     ;;
 
   gends)
