@@ -73,6 +73,12 @@ module "gcp_zabbix_pc" {
   project_id              = "${var.gcp_project_id}"
 }
 
+module "gcp_export_logging" {
+  source = "../../modules/gcp-export-logging"
+
+  project_id = "${var.gcp_project_id}"
+}
+
 # ELK server
 module "elk_server" {
   source = "../../modules/gcp-elk-server"
