@@ -1,22 +1,15 @@
-resource "google_project_service" "mcp-pubsub-service" {
-  project = "${var.project_id}"
-  service = "pubsub.googleapis.com"
-
-  disable_dependent_services = true
-}
-
 resource "google_pubsub_topic" "mcp-topic" {
-  project = "${google_project_service.mcp-pubsub-service.project}"
-  name = "topic-${google_project_service.mcp-pubsub-service.project}"
+  project = "${var.project_id}"
+  name = "topic-${var.project_id}"
 }
 
 resource "google_pubsub_subscription" "mcp-subscription" {
-  project = "${google_project_service.mcp-pubsub-service.project}"
-  name  = "subscription-${google_project_service.mcp-pubsub-service.project}"
+  project = "${google_pubsub_topic.mcp-topic.project}"
+  name  = "subscription-${var.project_id}"
   topic = "${google_pubsub_topic.mcp-topic.name}"
 
-  # 20 minutes
-  message_retention_duration = "1200s"
+  # 60 minutes
+  message_retention_duration = "3600s"
   retain_acked_messages      = true
 
   ack_deadline_seconds = 20
@@ -27,7 +20,7 @@ resource "google_pubsub_subscription" "mcp-subscription" {
 }
 
 resource "google_project_iam_audit_config" "mcp-audit-log" {
-  project = "${google_project_service.mcp-pubsub-service.project}"
+  project = "${google_pubsub_topic.mcp-topic.project}"
   service = "allServices"
   audit_log_config {
     log_type = "ADMIN_READ"
@@ -41,20 +34,20 @@ resource "google_project_iam_audit_config" "mcp-audit-log" {
 }
 
 resource "google_logging_project_sink" "mcp-sink" {
-  project = "${google_project_service.mcp-pubsub-service.project}"
-  name = "logging-sink-pubsub-${google_project_service.mcp-pubsub-service.project}"
-  destination = "pubsub.googleapis.com/projects/${google_project_service.mcp-pubsub-service.project}/topics/topic-mcp-testing-270009"
-  filter = "logName:\"/logs/cloudaudit.googleapis.com\" OR resource.type = gce"
+  project = "${google_pubsub_topic.mcp-topic.project}"
+  name = "logging-sink-pubsub-${var.project_id}"
+  destination = "pubsub.googleapis.com/projects/${var.project_id}/topics/${google_pubsub_topic.mcp-topic.name}"
+  filter = "logName:\"/logs/cloudaudit.googleapis.com\" OR resource.type=gce_instance"
 
   unique_writer_identity = true
 }
 
 resource "google_pubsub_topic_iam_binding" "mcp-log-writer" {
-  project = "${google_project_service.mcp-pubsub-service.project}"
+  project = "${google_logging_project_sink.mcp-sink.project}"
   topic = "${google_pubsub_topic.mcp-topic.name}"
   role = "roles/pubsub.publisher"
 
   members = [
-    "${google_logging_project_sink.mcp-sink.writer_identity}",
+    "${google_logging_project_sink.mcp-sink.writer_identity}"
   ]
 }
