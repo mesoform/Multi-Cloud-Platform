@@ -9,6 +9,6 @@ gcp_default_region = "{{MCP_GCP_DEFAULT_REGION}}"
 gcp_compute_region = "europe-west1"
 gcp_instance_zone = "europe-west1-c"
 gcp_volume_device_name = "/dev/sdf"
-gcp_ssh_user = "ubuntu"
+gcp_ssh_user = "root"
 
 local_public_ip="{{LOCAL_PUBLIC_IP}}/32"
