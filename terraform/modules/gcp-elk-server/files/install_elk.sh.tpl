@@ -72,18 +72,37 @@ services:
       - 9600:9600
     volumes:
       - "$WORK_DIR"/elk/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - "$WORK_DIR"/root/.ssh/mcp-testing-2020.json:/home/logstash/.ssh/mcp-testing-2020.json
 " > "$WORK_DIR"/docker-compose.yml
 
 echo "input {
+  google_pubsub {
+    json_key_file => \"/home/logstash/.ssh/mcp-testing-2020.json\"
+    project_id => \"mcp-testing-2020\"
+    topic => \"topic-mcp-testing-2020\"
+    subscription => \"subscription-mcp-testing-2020\"
+    include_metadata => true
+    codec => \"json\"
+    tags => [\"pubsub\"]
+  }
   beats {
     port => 5044
+    tags => [\"beats\"]
   }
 }
 
 output {
-  elasticsearch {
-    hosts    => \"elasticsearch:9200\"
-    index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+  if \"pubsub\" in [tags] {
+    elasticsearch {
+      hosts    => \"elasticsearch:9200\"
+      index => \"logstash-test-%%{+yyyy.MM.dd}\"
+    }
+  }
+  if \"beats\" in [tags] {
+    elasticsearch {
+      hosts    => \"elasticsearch:9200\"
+      index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+    }
   }
 }
 " > "$WORK_DIR"/elk/logstash/logstash.conf

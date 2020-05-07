@@ -38,6 +38,12 @@ resource "google_compute_instance" "elk_server" {
       // Ephemeral IP
     }
   }
+
+  provisioner "file" {
+    source      = "/home/juno/.ssh/mcp-testing-2020.json"
+    destination = "/root/.ssh/mcp-testing-2020.json"
+  }
+
   metadata {
     ssh-keys = "${var.gcp_ssh_user}:${file(var.gcp_public_key_path)}"
   }
