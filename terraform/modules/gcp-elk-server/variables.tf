@@ -62,3 +62,7 @@ variable "gcp_disk_size" {
   default = "20"
   description = "The size of the image in gigabytes"
 }
+
+variable "gcp_credentials_path" {}
+
+variable "gcp_credentials_file" {}

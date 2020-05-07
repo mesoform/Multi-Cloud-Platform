@@ -40,8 +40,8 @@ resource "google_compute_instance" "elk_server" {
   }
 
   provisioner "file" {
-    source      = "/home/juno/.ssh/mcp-testing-2020.json"
-    destination = "/root/.ssh/mcp-testing-2020.json"
+    source      = "${var.gcp_credentials_path}"
+    destination = "/root/.ssh/${var.gcp_credentials_file}"
   }
 
   metadata {

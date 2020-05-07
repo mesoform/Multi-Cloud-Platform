@@ -93,6 +93,8 @@ module "elk_server" {
   gcp_volume_device_name      = "${var.gcp_volume_device_name}"
   gcp_ssh_user                = "${var.gcp_ssh_user}"
   gcp_public_key_path         = "${var.gcp_public_key_path}"
+  gcp_credentials_path        = "${var.gcp_credentials_path}"
+  gcp_credentials_file        = "${var.gcp_credentials_file}"
 }
 
 # Zabbix server

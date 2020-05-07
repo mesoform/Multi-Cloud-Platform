@@ -11,6 +11,10 @@ variable "gcp_credentials_path" {
   description = "Path to gcp service account key file"
 }
 
+variable "gcp_credentials_file" {
+  description = "GCP service account key file"
+}
+
 variable "gcp_project_id" {}
 
 variable "gcp_default_region" {}
