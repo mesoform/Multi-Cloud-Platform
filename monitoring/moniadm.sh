@@ -43,6 +43,8 @@ export_env_vars
 
 verify_env_vars
 
+echo "MCP_GCP_CREDENTIALS_PATH: " ${MCP_GCP_CREDENTIALS_PATH}
+
 BIN="${SCRIPT_DIR}/../bin"
 mkdir -p ${BIN}
 
@@ -127,6 +129,13 @@ generateKubeconfig() {
 
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     RANCHER_VARS="${SCRIPT_DIR}/../config/${MCP_ENV}/rancher.vars"
+
+    echo "RANCHER_VARS:" $RANCHER_VARS
+    if [[ ! -f ${RANCHER_VARS} ]]; then
+      echo "rancher.vars file not found. Cluster manager might not exist. Verify and run mcadm.sh script to setup MCP"
+      exit 1
+    fi
+
     source "${RANCHER_VARS}"
     rancher_token="${RANCHER_ACCESS_KEY}:${RANCHER_SECRET_KEY}"
     rancher_clusters_api="${RANCHER_URL}/v3/clusters/"
