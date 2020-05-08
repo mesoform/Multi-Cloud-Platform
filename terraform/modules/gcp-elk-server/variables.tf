@@ -62,3 +62,7 @@ variable "gcp_disk_size" {
   default = "20"
   description = "The size of the image in gigabytes"
 }
+
+variable "mcp_topic_name" {}
+
+variable "mcp_subscription_name" {}

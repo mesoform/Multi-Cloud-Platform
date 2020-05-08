@@ -5,9 +5,14 @@ data "template_file" "install_elk" {
     hostname                  = "${var.hostname}"
     docker_engine_install_url = "${var.docker_engine_install_url}"
 
-    volume_device_name = "${var.gcp_volume_device_name}"
-    volume_mount_path  = "${var.gcp_volume_mount_path}"
+    volume_device_name  = "${var.gcp_volume_device_name}"
+    volume_mount_path   = "${var.gcp_volume_mount_path}"
     elasticsearch_image = "${var.elasticsearch_image}"
+
+    project               = "${var.gcp_project_id}"
+    mcp_topic_name        = "${var.mcp_topic_name}"
+    mcp_subscription_name = "${var.mcp_subscription_name}"
+
   }
 }
 

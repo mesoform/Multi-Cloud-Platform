@@ -77,9 +77,9 @@ services:
 
 echo "input {
   google_pubsub {
-    project_id => \"mcp-testing-2020\"
-    topic => \"topic-mcp-testing-2020\"
-    subscription => \"subscription-mcp-testing-2020\"
+    project_id => \"${project}\"
+    topic => \""${mcp_topic_name}"\"
+    subscription => \""${mcp_subscription_name}"\"
     include_metadata => true
     codec => \"json\"
     tags => [\"pubsub\"]

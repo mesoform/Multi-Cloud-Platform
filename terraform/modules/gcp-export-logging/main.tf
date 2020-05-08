@@ -8,8 +8,8 @@ resource "google_pubsub_subscription" "mcp-subscription" {
   name  = "subscription-${var.project_id}"
   topic = "${google_pubsub_topic.mcp-topic.name}"
 
-  # 60 minutes
-  message_retention_duration = "3600s"
+  # 24 hours
+  message_retention_duration = "86400s"
   retain_acked_messages      = true
 
   ack_deadline_seconds = 20
