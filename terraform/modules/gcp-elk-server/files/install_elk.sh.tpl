@@ -77,7 +77,6 @@ services:
 
 echo "input {
   google_pubsub {
-    json_key_file => \"/home/logstash/.ssh/mcp-testing-2020.json\"
     project_id => \"mcp-testing-2020\"
     topic => \"topic-mcp-testing-2020\"
     subscription => \"subscription-mcp-testing-2020\"

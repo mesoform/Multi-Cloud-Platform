@@ -555,6 +555,12 @@ function destroyManager() {
   echo "Destroying manager"
   echo ""
 
+  if [[ ! -f ${RANCHER_VARS} ]]; then
+    echo "RANCHER_VARS:" $RANCHER_VARS
+    echo "rancher.vars file not found. Cluster manager might not exist. Verify and run mcadm.sh script to setup MCP"
+    exit 1
+  fi
+
   source ${RANCHER_VARS} && MCP_BASE_MANAGER_CLOUD=${RANCHER_CLOUD}
 
   echo "Triton Kubernetes version: $(${TK8S} version)"

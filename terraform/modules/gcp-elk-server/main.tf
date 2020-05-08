@@ -44,6 +44,10 @@ resource "google_compute_instance" "elk_server" {
     destination = "/root/.ssh/${var.gcp_credentials_file}"
   }
 
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+  }
+
   metadata {
     ssh-keys = "${var.gcp_ssh_user}:${file(var.gcp_public_key_path)}"
   }
