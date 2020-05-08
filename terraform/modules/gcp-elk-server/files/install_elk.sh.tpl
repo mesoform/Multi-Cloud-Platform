@@ -72,7 +72,7 @@ services:
       - 9600:9600
     volumes:
       - "$WORK_DIR"/elk/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - "$WORK_DIR"/root/.ssh/mcp-testing-2020.json:/home/logstash/.ssh/mcp-testing-2020.json
+    command: sh -c \"logstash-plugin install logstash-input-google_pubsub && /usr/local/bin/docker-entrypoint\"
 " > "$WORK_DIR"/docker-compose.yml
 
 echo "input {

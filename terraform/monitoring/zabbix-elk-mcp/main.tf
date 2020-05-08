@@ -7,7 +7,7 @@ provider "aws" {
 
 /* Setup google provider */
 provider "google" {
-  credentials = "${file("${var.gcp_credentials_path}")}"
+  credentials = "${file("${var.gcp_path_to_credentials}")}"
   project     = "${var.gcp_project_id}"
   region      = "${var.gcp_compute_region}"
 }

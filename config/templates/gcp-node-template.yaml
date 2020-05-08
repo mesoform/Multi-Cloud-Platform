@@ -11,7 +11,7 @@ private_registry_password: ""
 k8s_registry: ""
 k8s_registry_username: ""
 k8s_registry_password: ""
-gcp_credentials_path: {{MCP_GCP_CREDENTIALS_PATH}}
+gcp_path_to_credentials: {{MCP_GCP_CREDENTIALS_PATH}}
 gcp_compute_region: {{MCP_GCP_DEFAULT_REGION}}
 # Node info
 node_count: {{MCP_NODE_COUNT}}

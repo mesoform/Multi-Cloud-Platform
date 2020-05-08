@@ -1,6 +1,6 @@
 /* Setup google provider */
 provider "google" {
-  credentials = "${file("${var.gcp_credentials_path}")}"
+  credentials = "${file("${var.gcp_path_to_credentials}")}"
   project     = "${var.gcp_project_id}"
   region      = "${var.gcp_compute_region}"
 }
@@ -93,8 +93,6 @@ module "elk_server" {
   gcp_volume_device_name      = "${var.gcp_volume_device_name}"
   gcp_ssh_user                = "${var.gcp_ssh_user}"
   gcp_public_key_path         = "${var.gcp_public_key_path}"
-  gcp_credentials_path        = "${var.gcp_credentials_path}"
-  gcp_credentials_file        = "${var.gcp_credentials_file}"
 }
 
 # Zabbix server

@@ -43,8 +43,6 @@ export_env_vars
 
 verify_env_vars
 
-export MCP_GCP_CREDENTIALS_FILE="$(basename -- ${MCP_GCP_CREDENTIALS_PATH})"
-
 BIN="${SCRIPT_DIR}/../bin"
 mkdir -p ${BIN}
 

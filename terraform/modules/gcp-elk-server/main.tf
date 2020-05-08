@@ -39,11 +39,6 @@ resource "google_compute_instance" "elk_server" {
     }
   }
 
-  provisioner "file" {
-    source      = "${var.gcp_credentials_path}"
-    destination = "/root/.ssh/${var.gcp_credentials_file}"
-  }
-
   service_account {
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }

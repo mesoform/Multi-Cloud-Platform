@@ -7,7 +7,7 @@ private_registry_username: ""
 private_registry_password: ""
 rancher_server_image: ""
 rancher_agent_image: ""
-gcp_credentials_path: {{MCP_GCP_CREDENTIALS_PATH}}
+gcp_path_to_credentials: {{MCP_GCP_CREDENTIALS_PATH}}
 gcp_compute_region: {{MCP_GCP_DEFAULT_REGION}}
 gcp_instance_zone: {{MCP_GCP_DEFAULT_REGION}}-b
 gcp_machine_type: g1-small

@@ -73,7 +73,7 @@ variable "ebs_volume_size" {
   default = "10"
 }
 
-variable "gcp_credentials_path" {
+variable "gcp_path_to_credentials" {
   default = "~/.ssh/gcp-account.json"
   description = "Path to gcp service account key file"
 }

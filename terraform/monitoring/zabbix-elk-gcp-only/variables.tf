@@ -7,12 +7,8 @@ variable "docker_engine_install_url" {
   description = "The URL to the shell script to install the docker engine."
 }
 
-variable "gcp_credentials_path" {
+variable "gcp_path_to_credentials" {
   description = "Path to gcp service account key file"
-}
-
-variable "gcp_credentials_file" {
-  description = "GCP service account key file"
 }
 
 variable "gcp_project_id" {}

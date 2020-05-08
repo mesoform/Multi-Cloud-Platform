@@ -14,7 +14,7 @@ aws_ami_id = "ami-0be057a22c63962cb"
 aws_instance_type = "t2.micro"
 aws_ssh_user = "ubuntu"
 
-gcp_credentials_path = "{{MCP_GCP_CREDENTIALS_PATH}}"
+gcp_path_to_credentials = "{{MCP_GCP_CREDENTIALS_PATH}}"
 gcp_project_id = "{{MCP_GCP_PROJECT_ID}}"
 gcp_k8s_cluster_name = "{{MCP_ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
 
