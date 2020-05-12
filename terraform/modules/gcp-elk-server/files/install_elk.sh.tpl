@@ -72,7 +72,7 @@ services:
       - 9600:9600
     volumes:
       - "$WORK_DIR"/elk/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    command: sh -c \"logstash-plugin install logstash-input-google_pubsub && /usr/local/bin/docker-entrypoint\"
+    command: sh -c \"logstash-plugin install logstash-input-google_pubsub logstash-filter-mutate && /usr/local/bin/docker-entrypoint\"
 " > "$WORK_DIR"/docker-compose.yml
 
 echo "input {
