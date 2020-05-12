@@ -173,7 +173,7 @@ registerClusterNodes() {
     zabbix_token_json="${ZABBIX_RESOURCES}/zabbix-token.json"
     zabbix_autoreg_json="${ZABBIX_RESOURCES}/zabbix-autoreg.json"
 
-    echo "Registering Cluster nodes to Zabbix server"
+    echo "Creating auto-registration action to register cluster nodes to Zabbix server"
 
     case "${OPTION_1}" in
       aws | all)
