@@ -80,6 +80,14 @@ resource "kubernetes_daemonset" "filebeat" {
               }
             }
           }
+          env {
+            name = "ELK_SERVER_HOST"
+            value = "${var.elksrv_private_ip}"
+          }
+          env {
+            name = "ELK_SRV_PUB_IP"
+            value = "${var.elksrv_public_ip}"
+          }
           security_context {
             privileged = true
           }

@@ -129,5 +129,6 @@ module "kubernetes_daemonset_elk_gcp" {
 
   kube_config_path = "~/.kube/config.gcp"
   elksrv_private_ip = "${module.elk_server.elk_gcp_private_ip}"
+  elksrv_public_ip = "${module.elk_server.elk_gcp_public_ip}"
   k8s_cluster_name = "${var.gcp_k8s_cluster_name}"
 }
