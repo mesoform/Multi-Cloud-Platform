@@ -90,11 +90,17 @@ echo "input {
   }
 }
 
+filter {
+  mutate { convert => { [\"container.labels.org_label-schema_build-date\",\"string\"] }
+  mutate { convert => { [\"docker.container.labels.org_label-schema_build-date\",\"string\"] }
+  mutate { convert => { [\"org_label-schema_build-date\",\"string\"] }
+}
+
 output {
   if \"pubsub\" in [tags] {
     elasticsearch {
       hosts    => \"elasticsearch:9200\"
-      index => \"logstash-test-%%{+yyyy.MM.dd}\"
+      index => \"gcp-logstash-%%{+yyyy.MM.dd}\"
     }
   }
   if \"beats\" in [tags] {
