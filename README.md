@@ -13,7 +13,7 @@ Clone the `mcp-setup` git repository and set environment variables locally on yo
     export MCP_ENV="test"
     export MCP_BASE_MANAGER_CLOUD="aws"
     export MCP_BASE_MANAGER_NAME="manager"
-    export MCP_RANCHER_ADMIN_PWD="rancher"
+    export MCP_RANCHER_ADMIN_PWD="R4nch3R"
     export MCP_BASE_CLUSTER_NAME="cluster"
     export MCP_K8S_NETWORK_PROVIDER="calico"
     export MCP_BASE_ETCD_NODE_NAME="etcd"
@@ -42,7 +42,7 @@ Default variables values are as follows:
     # RANCHER
     MCP_BASE_MANAGER_CLOUD="aws"                   # default cloud provider for rancher manager: aws or gcp
     MCP_BASE_MANAGER_NAME="manager"                # rancher manager name
-    MCP_RANCHER_ADMIN_PWD="rancher"                # rancher admin password
+    MCP_RANCHER_ADMIN_PWD="R4nch3R"                # rancher admin password
     # K8S
     MCP_BASE_CLUSTER_NAME="cluster"                # k8s cluster name
     MCP_K8S_NETWORK_PROVIDER="calico"              # k8s network provider: calico|canal|flannel|weave

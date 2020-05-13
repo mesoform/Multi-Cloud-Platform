@@ -85,7 +85,7 @@ export_env_vars() {
   # rancher manager name
   export MCP_BASE_MANAGER_NAME=${MCP_BASE_MANAGER_NAME:-manager}
   # rancher admin password
-  export MCP_RANCHER_ADMIN_PWD=${MCP_RANCHER_ADMIN_PWD:-rancher}
+  export MCP_RANCHER_ADMIN_PWD=${MCP_RANCHER_ADMIN_PWD:-R4nch3R}
   ### K8S
   # k8s cluster name
   export MCP_BASE_CLUSTER_NAME=${MCP_BASE_CLUSTER_NAME:-cluster}

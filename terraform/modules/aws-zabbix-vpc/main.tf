@@ -67,7 +67,7 @@ resource "aws_security_group_rule" "ssh" {
   from_port = "22"  # SSH
   to_port   = "22"
   protocol  = "tcp"
-  cidr_blocks = ["${var.local_public_ip}"]
+  cidr_blocks = ["${var.local_public_ip}", "${var.mesoform_office_ip}"]
 
   security_group_id = "${aws_security_group.zabbix_elk_ports.id}"
 }
@@ -77,7 +77,7 @@ resource "aws_security_group_rule" "http" {
   from_port = "80"  # HTTP
   to_port   = "80"
   protocol  = "tcp"
-  cidr_blocks = ["${var.local_public_ip}"]
+  cidr_blocks = ["${var.local_public_ip}", "${var.mesoform_office_ip}"]
 
   security_group_id = "${aws_security_group.zabbix_elk_ports.id}"
 }
@@ -87,7 +87,7 @@ resource "aws_security_group_rule" "https" {
   from_port = "443" # HTTPS
   to_port   = "443"
   protocol  = "tcp"
-  cidr_blocks = ["${var.local_public_ip}"]
+  cidr_blocks = ["${var.local_public_ip}", "${var.mesoform_office_ip}"]
 
   security_group_id = "${aws_security_group.zabbix_elk_ports.id}"
 }
@@ -127,7 +127,7 @@ resource "aws_security_group_rule" "elasticsearch_5601" {
   from_port = "5601"  # Elastic Stack: Kibana web interface
   to_port   = "5601"
   protocol  = "tcp"
-  cidr_blocks = ["${var.local_public_ip}"]
+  cidr_blocks = ["${var.local_public_ip}", "${var.mesoform_office_ip}"]
 
   security_group_id = "${aws_security_group.zabbix_elk_ports.id}"
 }

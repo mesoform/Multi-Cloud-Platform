@@ -22,3 +22,7 @@ variable "aws_public_key_path" {
 }
 
 variable "local_public_ip" {}
+
+variable "mesoform_office_ip" {
+  default     = "80.229.44.137/32"
+}
