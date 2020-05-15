@@ -173,8 +173,6 @@ registerClusterNodes() {
     zabbix_token_json="${ZABBIX_RESOURCES}/zabbix-token.json"
     zabbix_autoreg_json="${ZABBIX_RESOURCES}/zabbix-autoreg.json"
 
-    echo "Creating auto-registration action to register cluster nodes to Zabbix server"
-
     case "${OPTION_1}" in
       aws | all)
         cluster_kubecfg="config.aws"
@@ -188,6 +186,8 @@ registerClusterNodes() {
     zabbix_srv_pub_ip=$(kubectl --kubeconfig ~/.kube/${cluster_kubecfg} get daemonsets -o json | jq -r .items[].spec.template.spec.containers[].env[1].value)
     zabbix_api="http://${zabbix_srv_pub_ip}/api_jsonrpc.php"
 
+    echo "Waiting for the Zabbix server to respond"
+
     until $(curl --output /dev/null --silent --head --fail http://${zabbix_srv_pub_ip}/); do
       printf '.'
       sleep 10
@@ -196,7 +196,9 @@ registerClusterNodes() {
     zabbix_token=$(curl -ks -H "Content-Type: application/json" -X POST --data @${zabbix_token_json} ${zabbix_api} | jq -r .result)
 
     sed -i'.bck' "s/ZABBIX_TOKEN/${zabbix_token}/" ${zabbix_autoreg_json}
-    curl -k -H "Content-Type: application/json" -X POST --data @${zabbix_autoreg_json} ${zabbix_api}
+    zabbix_autoreg=$(curl -ks -H "Content-Type: application/json" -X POST --data @${zabbix_autoreg_json} ${zabbix_api})
+
+    echo "Auto-registration action to register cluster nodes to Zabbix server created"
 }
 
 installDependencies() {

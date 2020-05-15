@@ -91,9 +91,8 @@ echo "input {
 }
 
 filter {
-  mutate { convert => { [\"container.labels.org_label-schema_build-date\",\"string\"] }
-  mutate { convert => { [\"docker.container.labels.org_label-schema_build-date\",\"string\"] }
-  mutate { convert => { [\"org_label-schema_build-date\",\"string\"] }
+  mutate { convert => [\"container.labels.org_label-schema_build-date\",\"string\"] }
+  mutate { convert => [\"docker.container.labels.org_label-schema_build-date\",\"string\"] }
 }
 
 output {
