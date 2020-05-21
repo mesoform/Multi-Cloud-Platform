@@ -62,6 +62,14 @@ ZABBIX_RESOURCES="${SCRIPT_DIR}/../config/zabbix"
 
 #source "${SCRIPT_DIR}/funcsmon.sh"
 
+verifyTfvars() {
+  if [[ -f ${TERRAFORM_ROOT}/terraform.tfvars ]]; then
+    echo "Found terraform.tfvars file for ${TERRAFORM_ROOT_MODULE} setup"
+  else
+    echo "File terraform.tfvars not found for ${TERRAFORM_ROOT_MODULE} setup" && exit 1
+  fi
+}
+
 runSetup() {
     [[ -z "${OPTION_1}" ]] && help && exit 1
 
@@ -69,16 +77,19 @@ runSetup() {
       aws)
         TERRAFORM_ROOT_MODULE="zabbix-elk-aws-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
         ;;
 
       gcp)
         TERRAFORM_ROOT_MODULE="zabbix-elk-gcp-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
         ;;
 
       all)
         TERRAFORM_ROOT_MODULE="zabbix-elk-mcp"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
         ;;
 
       *)
