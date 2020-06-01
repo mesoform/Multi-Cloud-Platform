@@ -42,6 +42,7 @@ resource "google_compute_instance" "zabbix_server" {
   }
 
   service_account {
+    email = "${var.gcp_service_account_email}"
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 

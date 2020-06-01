@@ -85,6 +85,7 @@ module "elk_server" {
 
   hostname                    = "elk-server"
   gcp_project_id              = "${var.gcp_project_id}"
+  gcp_service_account_email   = "${var.gcp_service_account_email}"
   gcp_compute_region          = "${var.gcp_compute_region}"
   gcp_instance_zone           = "${var.gcp_instance_zone}"
   gcp_compute_network_name    = "${google_compute_network.zabbix_elk_net.name}"
@@ -103,6 +104,7 @@ module "zabbix_server" {
 
   hostname                    = "zabbix-server"
   gcp_project_id              = "${var.gcp_project_id}"
+  gcp_service_account_email   = "${var.gcp_service_account_email}"
   gcp_compute_region          = "${var.gcp_compute_region}"
   gcp_instance_zone           = "${var.gcp_instance_zone}"
   gcp_compute_network_name    = "${google_compute_network.zabbix_elk_net.name}"

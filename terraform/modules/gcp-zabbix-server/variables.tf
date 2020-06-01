@@ -14,6 +14,10 @@ variable "zabbix_server_image" {
 
 variable "gcp_project_id" {}
 
+variable "gcp_service_account_email" {
+  description = "Service account client email"
+}
+
 variable "gcp_compute_region" {
   description = "Default gcp region to manage resources in"
 //  default = "us-east1"

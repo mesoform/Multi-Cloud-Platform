@@ -1,6 +1,7 @@
 name = "zabbix-elk"
 
 gcp_path_to_credentials = "{{MCP_GCP_CREDENTIALS_PATH}}"
+gcp_service_account_email = "{{SERVICE_ACCOUNT_EMAIL}}"
 gcp_public_key_path = "{{MCP_GCP_PUBLIC_KEY_PATH}}"
 gcp_project_id = "{{MCP_GCP_PROJECT_ID}}"
 gcp_k8s_cluster_name = "{{MCP_ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
