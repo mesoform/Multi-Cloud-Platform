@@ -13,3 +13,6 @@ gcp_volume_device_name = "/dev/sdf"
 gcp_ssh_user = "ubuntu"
 
 local_public_ip="{{LOCAL_PUBLIC_IP}}/32"
+secure_source_ip="{{SECURE_SOURCE_IP}}/32"
+
+expiration_policy = "{{EXPIRATION_POLICY}}"

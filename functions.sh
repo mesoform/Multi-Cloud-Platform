@@ -30,6 +30,7 @@ print_env_vars() {
   echo "MCP_GCP_DEFAULT_REGION:" ${MCP_GCP_DEFAULT_REGION}
   echo "MCP_GCP_PUBLIC_KEY_PATH:" ${MCP_GCP_PUBLIC_KEY_PATH}
   echo "MCP_GCP_PRIVATE_KEY_PATH:" ${MCP_GCP_PRIVATE_KEY_PATH}
+  echo "SECURE_SOURCE_IP:" ${SECURE_SOURCE_IP}
   echo ""
 }
 
@@ -125,6 +126,8 @@ export_env_vars() {
   export MCP_GCP_PUBLIC_KEY_PATH=${MCP_GCP_PUBLIC_KEY_PATH:-~/.ssh/id_rsa.pub}
   # auth private rsa key
   export MCP_GCP_PRIVATE_KEY_PATH=${MCP_GCP_PRIVATE_KEY_PATH:-~/.ssh/id_rsa}
+  # secure ip to add to monitoring firewall
+  export SECURE_SOURCE_IP=${SECURE_SOURCE_IP:-80.229.44.137}
   echo "Environment variables exported"
 }
 

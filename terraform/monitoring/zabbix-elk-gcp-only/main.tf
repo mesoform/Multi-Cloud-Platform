@@ -50,7 +50,7 @@ resource "google_compute_firewall" "zabbix_elk_external" {
   name          = "${var.name}-ext-ports"
   network       = "${google_compute_network.zabbix_elk_net.name}"
 //  source_tags = ["${var.name}-servers"]
-  source_ranges = ["${var.local_public_ip}", "${var.mesoform_office_ip}"]
+  source_ranges = ["${var.local_public_ip}", "${var.secure_source_ip}"]
 
   allow {
     protocol = "tcp"
@@ -77,6 +77,7 @@ module "gcp_export_logging" {
   source = "../../modules/gcp-export-logging"
 
   project_id = "${var.gcp_project_id}"
+  expiration_policy = "${var.expiration_policy}"
 }
 
 # ELK server

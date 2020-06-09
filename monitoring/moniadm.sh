@@ -81,7 +81,9 @@ runSetup() {
         ;;
 
       gcp)
-        export SERVICE_ACCOUNT_EMAIL=$(cat ${MCP_GCP_CREDENTIALS_PATH} | jq -r .client_email)
+        export SERVICE_ACCOUNT_EMAIL=$(jq -r .client_email ${MCP_GCP_CREDENTIALS_PATH})
+        echo "MCP_ENV:" ${MCP_ENV}
+        [[ ${MCP_ENV} != "prod" ]] && export EXPIRATION_POLICY="604800s"
         TERRAFORM_ROOT_MODULE="zabbix-elk-gcp-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
         [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
