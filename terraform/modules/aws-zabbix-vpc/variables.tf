@@ -22,3 +22,5 @@ variable "aws_public_key_path" {
 }
 
 variable "local_public_ip" {}
+
+variable "secure_source_ip" {}

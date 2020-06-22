@@ -15,3 +15,4 @@ aws_instance_type = "t2.micro"
 aws_ssh_user = "ubuntu"
 
 local_public_ip="{{LOCAL_PUBLIC_IP}}/32"
+secure_source_ip="{{SECURE_SOURCE_IP}}/32"

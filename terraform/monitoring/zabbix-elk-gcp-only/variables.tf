@@ -11,6 +11,10 @@ variable "gcp_path_to_credentials" {
   description = "Path to gcp service account key file"
 }
 
+variable "gcp_service_account_email" {
+  description = "Service account client email"
+}
+
 variable "gcp_project_id" {}
 
 variable "gcp_default_region" {}
@@ -51,3 +55,7 @@ variable "gcp_ssh_user" {}
 variable "gcp_public_key_path" {}
 
 variable "local_public_ip" {}
+
+variable "secure_source_ip" {}
+
+variable "expiration_policy" {}

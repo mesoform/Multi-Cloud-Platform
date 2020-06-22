@@ -26,10 +26,11 @@ print_env_vars() {
   echo "MCP_AWS_PUBLIC_KEY_PATH:" ${MCP_AWS_PUBLIC_KEY_PATH}
   echo "MCP_AWS_PRIVATE_KEY_PATH:" ${MCP_AWS_PRIVATE_KEY_PATH}
   echo "MCP_GCP_PROJECT_ID:" ${MCP_GCP_PROJECT_ID}
-  echo "MCP_GCP_PATH_TO_CREDENTIALS:" ${MCP_GCP_PATH_TO_CREDENTIALS}
+  echo "MCP_GCP_CREDENTIALS_PATH:" ${MCP_GCP_CREDENTIALS_PATH}
   echo "MCP_GCP_DEFAULT_REGION:" ${MCP_GCP_DEFAULT_REGION}
   echo "MCP_GCP_PUBLIC_KEY_PATH:" ${MCP_GCP_PUBLIC_KEY_PATH}
   echo "MCP_GCP_PRIVATE_KEY_PATH:" ${MCP_GCP_PRIVATE_KEY_PATH}
+  echo "SECURE_SOURCE_IP:" ${SECURE_SOURCE_IP}
   echo ""
 }
 
@@ -43,14 +44,14 @@ verify_env_vars() {
 
   gcp)
     [[ -z "${MCP_GCP_PROJECT_ID}" ]] && echo "No GCP project selected" && exit 1
-    [[ -z "${MCP_GCP_PATH_TO_CREDENTIALS}" ]] && echo "No GCP credentials selected" && exit 1
+    [[ -z "${MCP_GCP_CREDENTIALS_PATH}" ]] && echo "No GCP credentials selected" && exit 1
     ;;
 
   all)
     [[ -z "${MCP_AWS_ACCESS_KEY}" ]] && echo "No AWS access key selected" && exit 1
     [[ -z "${MCP_AWS_SECRET_KEY}" ]] && echo "No AWS secret key selected" && exit 1
     [[ -z "${MCP_GCP_PROJECT_ID}" ]] && echo "No GCP project selected" && exit 1
-    [[ -z "${MCP_GCP_PATH_TO_CREDENTIALS}" ]] && echo "No GCP credentials selected" && exit 1
+    [[ -z "${MCP_GCP_CREDENTIALS_PATH}" ]] && echo "No GCP credentials selected" && exit 1
     ;;
 
   manager | cluster | node | enode | cnode | wnode)
@@ -61,7 +62,7 @@ verify_env_vars() {
       [[ -z "${MCP_AWS_SECRET_KEY}" ]] && echo "No AWS secret key selected" && exit 1
     elif [[ ${OPTION_2} == *"gcp"* ]]; then
       [[ -z "${MCP_GCP_PROJECT_ID}" ]] && echo "No GCP project selected" && exit 1
-      [[ -z "${MCP_GCP_PATH_TO_CREDENTIALS}" ]] && echo "No GCP credentials selected" && exit 1
+      [[ -z "${MCP_GCP_CREDENTIALS_PATH}" ]] && echo "No GCP credentials selected" && exit 1
     else
       help && exit 1
     fi
@@ -85,7 +86,7 @@ export_env_vars() {
   # rancher manager name
   export MCP_BASE_MANAGER_NAME=${MCP_BASE_MANAGER_NAME:-manager}
   # rancher admin password
-  export MCP_RANCHER_ADMIN_PWD=${MCP_RANCHER_ADMIN_PWD:-rancher}
+  export MCP_RANCHER_ADMIN_PWD=${MCP_RANCHER_ADMIN_PWD:-R4nch3R}
   ### K8S
   # k8s cluster name
   export MCP_BASE_CLUSTER_NAME=${MCP_BASE_CLUSTER_NAME:-cluster}
@@ -118,13 +119,15 @@ export_env_vars() {
   # gcp project id
   export MCP_GCP_PROJECT_ID=${MCP_GCP_PROJECT_ID:-}
   # gcp service account credentials
-  export MCP_GCP_PATH_TO_CREDENTIALS=${MCP_GCP_PATH_TO_CREDENTIALS:-}
+  export MCP_GCP_CREDENTIALS_PATH=${MCP_GCP_CREDENTIALS_PATH:-}
   # gcp default region
   export MCP_GCP_DEFAULT_REGION=${MCP_GCP_DEFAULT_REGION:-europe-west2}
   # auth public rsa key
   export MCP_GCP_PUBLIC_KEY_PATH=${MCP_GCP_PUBLIC_KEY_PATH:-~/.ssh/id_rsa.pub}
   # auth private rsa key
   export MCP_GCP_PRIVATE_KEY_PATH=${MCP_GCP_PRIVATE_KEY_PATH:-~/.ssh/id_rsa}
+  # secure ip to add to monitoring firewall
+  export SECURE_SOURCE_IP=${SECURE_SOURCE_IP:-80.229.44.137}
   echo "Environment variables exported"
 }
 

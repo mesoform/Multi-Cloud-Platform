@@ -13,7 +13,7 @@ Clone the `mcp-setup` git repository and set environment variables locally on yo
     export MCP_ENV="test"
     export MCP_BASE_MANAGER_CLOUD="aws"
     export MCP_BASE_MANAGER_NAME="manager"
-    export MCP_RANCHER_ADMIN_PWD="rancher"
+    export MCP_RANCHER_ADMIN_PWD="R4nch3R"
     export MCP_BASE_CLUSTER_NAME="cluster"
     export MCP_K8S_NETWORK_PROVIDER="calico"
     export MCP_BASE_ETCD_NODE_NAME="etcd"
@@ -28,13 +28,14 @@ Clone the `mcp-setup` git repository and set environment variables locally on yo
     export MCP_AWS_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"
     export MCP_AWS_PRIVATE_KEY_PATH="~/.ssh/id_rsa"
     export MCP_GCP_PROJECT_ID="mcp-testing"
-    export MCP_GCP_PATH_TO_CREDENTIALS="~/.ssh/gcp-service-account.json"
+    export MCP_GCP_CREDENTIALS_PATH="~/.ssh/gcp-service-account.json"
     export MCP_GCP_DEFAULT_REGION="europe-west2"
     export MCP_GCP_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"
     export MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"
+    export SECURE_SOURCE_IP="147.161.96.35"
     ```
 
-`MCP_AWS_ACCESS_KEY`, `MCP_AWS_SECRET_KEY` and/or `MCP_GCP_PROJECT_ID`, `MCP_GCP_PATH_TO_CREDENTIAL` are mandatory and do not have a default value.
+`MCP_AWS_ACCESS_KEY`, `MCP_AWS_SECRET_KEY` and/or `MCP_GCP_PROJECT_ID`, `MCP_GCP_CREDENTIALS_PATH` are mandatory and do not have a default value.
 
 Default variables values are as follows:
 
@@ -42,7 +43,7 @@ Default variables values are as follows:
     # RANCHER
     MCP_BASE_MANAGER_CLOUD="aws"                   # default cloud provider for rancher manager: aws or gcp
     MCP_BASE_MANAGER_NAME="manager"                # rancher manager name
-    MCP_RANCHER_ADMIN_PWD="rancher"                # rancher admin password
+    MCP_RANCHER_ADMIN_PWD="R4nch3R"                # rancher admin password
     # K8S
     MCP_BASE_CLUSTER_NAME="cluster"                # k8s cluster name
     MCP_K8S_NETWORK_PROVIDER="calico"              # k8s network provider: calico|canal|flannel|weave
@@ -60,10 +61,12 @@ Default variables values are as follows:
     MCP_AWS_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
     # GCP
     MCP_GCP_PROJECT_ID=""                          # gcp project id. E.g. MCP_GCP_PROJECT_ID=mcp-testing
-    MCP_GCP_PATH_TO_CREDENTIALS=""                 # gcp service account credentials. E.g. MCP_GCP_PATH_TO_CREDENTIALS=~/.ssh/gcp-credentials.json
+    MCP_GCP_CREDENTIALS_PATH=""                    # gcp service account credentials. E.g. MCP_GCP_CREDENTIALS_PATH=~/.ssh/gcp-credentials.json
     MCP_GCP_DEFAULT_REGION="europe-west2"          # gcp default region
     MCP_GCP_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"    # auth public rsa key
     MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
+    # SECURE SOURCE IP
+    SECURE_SOURCE_IP="80.229.44.137"               # any secure IP to add to the monitoring service firewall 
     
 
 Exported variables on your shell will take precedence from the defined default values. 

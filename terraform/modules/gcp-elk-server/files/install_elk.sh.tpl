@@ -55,6 +55,7 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    command: sh -c \"yes | elasticsearch-plugin install repository-gcs && /usr/local/bin/docker-entrypoint.sh\"
   kibana:
     image: docker.elastic.co/kibana/kibana:7.6.0
     container_name: kibana
@@ -72,18 +73,41 @@ services:
       - 9600:9600
     volumes:
       - "$WORK_DIR"/elk/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    command: sh -c \"logstash-plugin install logstash-input-google_pubsub logstash-filter-mutate && /usr/local/bin/docker-entrypoint\"
 " > "$WORK_DIR"/docker-compose.yml
 
 echo "input {
+  google_pubsub {
+    project_id => \"${project}\"
+    topic => \""${mcp_topic_name}"\"
+    subscription => \""${mcp_subscription_name}"\"
+    include_metadata => true
+    codec => \"json\"
+    tags => [\"pubsub\"]
+  }
   beats {
     port => 5044
+    tags => [\"beats\"]
   }
 }
 
+filter {
+  mutate { convert => [\"container.labels.org_label-schema_build-date\",\"string\"] }
+  mutate { convert => [\"docker.container.labels.org_label-schema_build-date\",\"string\"] }
+}
+
 output {
-  elasticsearch {
-    hosts    => \"elasticsearch:9200\"
-    index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+  if \"pubsub\" in [tags] {
+    elasticsearch {
+      hosts    => \"elasticsearch:9200\"
+      index => \"gcp-logstash-%%{+yyyy.MM.dd}\"
+    }
+  }
+  if \"beats\" in [tags] {
+    elasticsearch {
+      hosts    => \"elasticsearch:9200\"
+      index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+    }
   }
 }
 " > "$WORK_DIR"/elk/logstash/logstash.conf

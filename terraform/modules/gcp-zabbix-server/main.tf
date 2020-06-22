@@ -40,6 +40,12 @@ resource "google_compute_instance" "zabbix_server" {
       // Ephemeral IP
     }
   }
+
+  service_account {
+    email = "${var.gcp_service_account_email}"
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+  }
+
   metadata {
     ssh-keys = "${var.gcp_ssh_user}:${file(var.gcp_public_key_path)}"
   }

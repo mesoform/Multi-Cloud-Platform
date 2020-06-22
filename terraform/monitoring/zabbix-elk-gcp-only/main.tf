@@ -50,7 +50,7 @@ resource "google_compute_firewall" "zabbix_elk_external" {
   name          = "${var.name}-ext-ports"
   network       = "${google_compute_network.zabbix_elk_net.name}"
 //  source_tags = ["${var.name}-servers"]
-  source_ranges = ["${var.local_public_ip}"]
+  source_ranges = ["${var.local_public_ip}", "${var.secure_source_ip}"]
 
   allow {
     protocol = "tcp"
@@ -73,12 +73,20 @@ module "gcp_zabbix_pc" {
   project_id              = "${var.gcp_project_id}"
 }
 
+module "gcp_export_logging" {
+  source = "../../modules/gcp-export-logging"
+
+  project_id = "${var.gcp_project_id}"
+  expiration_policy = "${var.expiration_policy}"
+}
+
 # ELK server
 module "elk_server" {
   source = "../../modules/gcp-elk-server"
 
   hostname                    = "elk-server"
   gcp_project_id              = "${var.gcp_project_id}"
+  gcp_service_account_email   = "${var.gcp_service_account_email}"
   gcp_compute_region          = "${var.gcp_compute_region}"
   gcp_instance_zone           = "${var.gcp_instance_zone}"
   gcp_compute_network_name    = "${google_compute_network.zabbix_elk_net.name}"
@@ -87,6 +95,8 @@ module "elk_server" {
   gcp_volume_device_name      = "${var.gcp_volume_device_name}"
   gcp_ssh_user                = "${var.gcp_ssh_user}"
   gcp_public_key_path         = "${var.gcp_public_key_path}"
+  mcp_topic_name              = "${module.gcp_export_logging.mcp_topic_name}"
+  mcp_subscription_name       = "${module.gcp_export_logging.mcp_subscription_name}"
 }
 
 # Zabbix server
@@ -95,6 +105,7 @@ module "zabbix_server" {
 
   hostname                    = "zabbix-server"
   gcp_project_id              = "${var.gcp_project_id}"
+  gcp_service_account_email   = "${var.gcp_service_account_email}"
   gcp_compute_region          = "${var.gcp_compute_region}"
   gcp_instance_zone           = "${var.gcp_instance_zone}"
   gcp_compute_network_name    = "${google_compute_network.zabbix_elk_net.name}"
@@ -121,5 +132,6 @@ module "kubernetes_daemonset_elk_gcp" {
 
   kube_config_path = "~/.kube/config.gcp"
   elksrv_private_ip = "${module.elk_server.elk_gcp_private_ip}"
+  elksrv_public_ip = "${module.elk_server.elk_gcp_public_ip}"
   k8s_cluster_name = "${var.gcp_k8s_cluster_name}"
 }

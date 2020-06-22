@@ -14,11 +14,12 @@ aws_ami_id = "ami-0be057a22c63962cb"
 aws_instance_type = "t2.micro"
 aws_ssh_user = "ubuntu"
 
-gcp_path_to_credentials = "{{MCP_GCP_PATH_TO_CREDENTIALS}}"
+gcp_path_to_credentials = "{{MCP_GCP_CREDENTIALS_PATH}}"
 gcp_project_id = "{{MCP_GCP_PROJECT_ID}}"
 gcp_k8s_cluster_name = "{{MCP_ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
 
 gcp_compute_region = "europe-west2"
 gcp_vpc_cidr = "10.154.0.0/20"
 
-local_public_ip="{{LOCAL_PUBLIC_IP}}/32"
+local_public_ip = "{{LOCAL_PUBLIC_IP}}/32"
+secure_source_ip = "{{SECURE_SOURCE_IP}}/32"

@@ -32,6 +32,10 @@ variable "gcp_instance_zone" {
 
 variable "gcp_project_id" {}
 
+variable "gcp_service_account_email" {
+  description = "Service account client email"
+}
+
 variable "gcp_image" {
   description = "The image to initialise the disk for instance. E.g. ubuntu-1604-xenial-v20190430"
 }
@@ -62,3 +66,7 @@ variable "gcp_disk_size" {
   default = "20"
   description = "The size of the image in gigabytes"
 }
+
+variable "mcp_topic_name" {}
+
+variable "mcp_subscription_name" {}

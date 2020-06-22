@@ -62,6 +62,14 @@ ZABBIX_RESOURCES="${SCRIPT_DIR}/../config/zabbix"
 
 #source "${SCRIPT_DIR}/funcsmon.sh"
 
+verifyTfvars() {
+  if [[ -f ${TERRAFORM_ROOT}/terraform.tfvars ]]; then
+    echo "Found terraform.tfvars file for ${TERRAFORM_ROOT_MODULE} setup"
+  else
+    echo "File terraform.tfvars not found for ${TERRAFORM_ROOT_MODULE} setup" && exit 1
+  fi
+}
+
 runSetup() {
     [[ -z "${OPTION_1}" ]] && help && exit 1
 
@@ -69,16 +77,22 @@ runSetup() {
       aws)
         TERRAFORM_ROOT_MODULE="zabbix-elk-aws-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
         ;;
 
       gcp)
+        export SERVICE_ACCOUNT_EMAIL=$(jq -r .client_email ${MCP_GCP_CREDENTIALS_PATH})
+        echo "MCP_ENV:" ${MCP_ENV}
+        [[ ${MCP_ENV} != "prod" ]] && export EXPIRATION_POLICY="604800s"
         TERRAFORM_ROOT_MODULE="zabbix-elk-gcp-only"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
         ;;
 
       all)
         TERRAFORM_ROOT_MODULE="zabbix-elk-mcp"
         TERRAFORM_ROOT="${TERRAFORM_BASE}/monitoring/${TERRAFORM_ROOT_MODULE}"
+        [[ ${TERRAFORM_COMMAND} == "destroy" ]] && verifyTfvars
         ;;
 
       *)
@@ -127,6 +141,13 @@ generateKubeconfig() {
 
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     RANCHER_VARS="${SCRIPT_DIR}/../config/${MCP_ENV}/rancher.vars"
+
+    if [[ ! -f ${RANCHER_VARS} ]]; then
+      echo "RANCHER_VARS:" $RANCHER_VARS
+      echo "rancher.vars file not found. Cluster manager might not exist. Verify and run mcadm.sh script to setup MCP"
+      exit 1
+    fi
+
     source "${RANCHER_VARS}"
     rancher_token="${RANCHER_ACCESS_KEY}:${RANCHER_SECRET_KEY}"
     rancher_clusters_api="${RANCHER_URL}/v3/clusters/"
@@ -166,8 +187,6 @@ registerClusterNodes() {
     zabbix_token_json="${ZABBIX_RESOURCES}/zabbix-token.json"
     zabbix_autoreg_json="${ZABBIX_RESOURCES}/zabbix-autoreg.json"
 
-    echo "Registering Cluster nodes to Zabbix server"
-
     case "${OPTION_1}" in
       aws | all)
         cluster_kubecfg="config.aws"
@@ -181,6 +200,8 @@ registerClusterNodes() {
     zabbix_srv_pub_ip=$(kubectl --kubeconfig ~/.kube/${cluster_kubecfg} get daemonsets -o json | jq -r .items[].spec.template.spec.containers[].env[1].value)
     zabbix_api="http://${zabbix_srv_pub_ip}/api_jsonrpc.php"
 
+    echo "Waiting for the Zabbix server to respond..."
+
     until $(curl --output /dev/null --silent --head --fail http://${zabbix_srv_pub_ip}/); do
       printf '.'
       sleep 10
@@ -189,7 +210,15 @@ registerClusterNodes() {
     zabbix_token=$(curl -ks -H "Content-Type: application/json" -X POST --data @${zabbix_token_json} ${zabbix_api} | jq -r .result)
 
     sed -i'.bck' "s/ZABBIX_TOKEN/${zabbix_token}/" ${zabbix_autoreg_json}
-    curl -k -H "Content-Type: application/json" -X POST --data @${zabbix_autoreg_json} ${zabbix_api}
+    zabbix_autoreg=$(curl -ks -H "Content-Type: application/json" -X POST --data @${zabbix_autoreg_json} ${zabbix_api})
+
+    if [[ ${zabbix_autoreg} == *"actionids"* ]]; then
+      echo "Auto-registration action created. Cluster nodes will be registered to Zabbix server shortly"
+    elif [[ ${zabbix_autoreg} == *"exists"* ]]; then
+      echo "Cluster node will be registered to Zabbix server shortly"
+    else
+      echo "Something went wrong. Check whether the auto-registration action exists on the Zabbix server"
+    fi
 }
 
 installDependencies() {

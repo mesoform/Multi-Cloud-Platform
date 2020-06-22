@@ -1,6 +1,7 @@
 name = "zabbix-elk"
 
-gcp_path_to_credentials = "{{MCP_GCP_PATH_TO_CREDENTIALS}}"
+gcp_path_to_credentials = "{{MCP_GCP_CREDENTIALS_PATH}}"
+gcp_service_account_email = "{{SERVICE_ACCOUNT_EMAIL}}"
 gcp_public_key_path = "{{MCP_GCP_PUBLIC_KEY_PATH}}"
 gcp_project_id = "{{MCP_GCP_PROJECT_ID}}"
 gcp_k8s_cluster_name = "{{MCP_ENV}}-gcp-{{MCP_BASE_CLUSTER_NAME}}"
@@ -12,3 +13,6 @@ gcp_volume_device_name = "/dev/sdf"
 gcp_ssh_user = "ubuntu"
 
 local_public_ip="{{LOCAL_PUBLIC_IP}}/32"
+secure_source_ip="{{SECURE_SOURCE_IP}}/32"
+
+expiration_policy = "{{EXPIRATION_POLICY}}"
