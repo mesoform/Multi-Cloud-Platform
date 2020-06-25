@@ -159,7 +159,7 @@ installLinuxDependencies() {
         echo ""
 
         cd "${BIN}"
-        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_linux-amd64.zip
+        TK8S_URL_LIN=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.3-mf/triton-kubernetes_0.9.3-mf_linux-amd64.zip
         TK8S_FILE_LIN="${TK8S_URL_LIN##*/}"
 
         echo "URL: ${TK8S_URL_LIN}"
@@ -231,7 +231,7 @@ installDarwinDependencies() {
         echo ""
 
         cd "${BIN}"
-        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.2-mf/triton-kubernetes_0.9.2-mf_osx-amd64.zip
+        TK8S_URL_DAR=https://github.com/mesoform/triton-kubernetes/releases/download/v0.9.3-mf/triton-kubernetes_0.9.3-mf_osx-amd64.zip
         TK8S_FILE_DAR="${TK8S_URL_DAR##*/}"
 
         echo "URL: ${TK8S_URL_DAR}"
