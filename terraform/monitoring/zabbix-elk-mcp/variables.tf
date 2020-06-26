@@ -116,3 +116,5 @@ variable "gcp_k8s_cluster_name" {
 }
 
 variable "local_public_ip" {}
+
+variable "secure_source_ip" {}

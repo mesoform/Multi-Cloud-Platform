@@ -66,7 +66,7 @@ Default variables values are as follows:
     MCP_GCP_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"    # auth public rsa key
     MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
     # SECURE SOURCE IP
-    SECURE_SOURCE_IP="80.229.44.137"               # any secure IP to add to the monitoring service firewall 
+    SECURE_SOURCE_IP="80.229.44.137"               # any secure IP to add to the monitoring services (Zabbix/ELK) firewalls
     
 
 Exported variables on your shell will take precedence from the defined default values. 
@@ -130,6 +130,8 @@ To check exported variables on current shell run the following command: `env | g
       
       `rancher_url = https://3.4.1.2`
         
+
+- Use SECURE_SOURCE_IP to add any IP to the monitoring services firewalls so Zabbix Web and Kibana UI can be reached from that IP 
 
 
 - The Zabbix Web Frontend can be accessed on a browser using the public Zabbix Server IP. User: Admin

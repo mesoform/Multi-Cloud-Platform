@@ -20,6 +20,8 @@ help() {
 
 SCRIPT_NAME=$0
 
+echo "${SCRIPT_NAME}"
+
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -28,9 +30,10 @@ COMMAND=$1
 shift
 
 OPTION_1=$1
+[[ -z "${OPTION_1}" ]] && help && exit 1
+shift
 
-set -u
-set -o pipefail
+OPTION_2=$1
 
 # Load functions
 source "${SCRIPT_DIR}/../functions.sh"
