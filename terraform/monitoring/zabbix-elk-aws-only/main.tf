@@ -14,7 +14,8 @@ module "zabbix_elk_vpc" {
   aws_subnet_cidr     = "${var.aws_subnet_cidr}"
   aws_key_name        = "${var.aws_key_name}"
   aws_public_key_path = "${var.aws_public_key_path}"
-  local_public_ip      = "${var.local_public_ip}"
+  local_public_ip     = "${var.local_public_ip}"
+  secure_source_ip    = "${var.secure_source_ip}"
 }
 
 # Kubernetes cluster data sources

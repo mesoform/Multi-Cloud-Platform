@@ -55,7 +55,7 @@ verify_env_vars() {
     ;;
 
   manager | cluster | node | enode | cnode | wnode)
-    if [[ -z "${OPTION_2}" ]]; then
+    if [[ -z "${OPTION_2}" ]] && [[ "${SCRIPT_NAME}" == "./mcadm.sh" ]]; then
       echo "Verifying..."
     elif [[ ${OPTION_2} == *"aws"* ]]; then
       [[ -z "${MCP_AWS_ACCESS_KEY}" ]] && echo "No AWS access key selected" && exit 1

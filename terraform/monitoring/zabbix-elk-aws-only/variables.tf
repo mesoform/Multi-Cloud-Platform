@@ -90,3 +90,4 @@ variable "ebs_volume_size" {
 
 variable "local_public_ip" {}
 
+variable "secure_source_ip" {}

@@ -36,6 +36,8 @@ help() {
 
 SCRIPT_NAME=$0
 
+echo "${SCRIPT_NAME}"
+
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -571,6 +573,7 @@ function destroyManager() {
     --config "${CONFIG_DIR}/${MCP_ENV}/manager-info.yaml"
 
   rm -rf "${CONFIG_DIR:?}/${MCP_ENV:?}/"
+  rm -rf "${BIN}"
 }
 
 function destroyCluster() {
