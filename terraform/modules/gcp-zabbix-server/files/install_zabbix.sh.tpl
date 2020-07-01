@@ -55,7 +55,7 @@ services:
       - 10051:10051
   filebeat:
     restart: always
-    image: docker.elastic.co/beats/filebeat:7.6.0
+    image: docker.elastic.co/beats/filebeat:6.7.2
     container_name: filebeat
     user: root
     environment:

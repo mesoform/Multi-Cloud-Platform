@@ -17,7 +17,7 @@ variable "gcp_volume_mount_path" {
 }
 
 variable "elasticsearch_image" {
-  default = "docker.elastic.co/elasticsearch/elasticsearch:7.4.2"
+  default = "docker.elastic.co/elasticsearch/elasticsearch:7.8.0"
   description = "The Elasticsearch docker image."
 }
 
