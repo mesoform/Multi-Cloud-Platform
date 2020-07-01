@@ -55,6 +55,8 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    volumes:
+      - /home/ubuntu/.ssh/mcp-service.json:/root/.ssh/mcp-service.json
     command: sh -c \"yes | elasticsearch-plugin install repository-gcs && /usr/local/bin/docker-entrypoint.sh\"
   kibana:
     image: docker.elastic.co/kibana/kibana:7.6.0
