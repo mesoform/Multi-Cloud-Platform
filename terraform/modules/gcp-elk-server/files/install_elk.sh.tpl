@@ -100,13 +100,25 @@ output {
   if \"pubsub\" in [tags] {
     elasticsearch {
       hosts    => \"elasticsearch:9200\"
-      index => \"gcp-logstash-%%{+yyyy.MM.dd}\"
+      index => \"gcp-audit-%%{+yyyy.MM.dd}\"
     }
   }
   if \"beats\" in [tags] {
-    elasticsearch {
-      hosts    => \"elasticsearch:9200\"
-      index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+    if [@metadata][beat] == \"zabbix-server\" {
+        elasticsearch {
+            hosts    => \"elasticsearch:9200\"
+            index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+        }
+    } else if [kubernetes][namespace] {
+        elasticsearch {
+            hosts    => \"elasticsearch:9200\"
+            index => \"%%{[@metadata][beat]}-%%{[kubernetes][namespace]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+        }
+    } else {
+        elasticsearch {
+            hosts    => \"elasticsearch:9200\"
+            index => \"%%{[@metadata][beat]}-errors-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+        }
     }
   }
 }
