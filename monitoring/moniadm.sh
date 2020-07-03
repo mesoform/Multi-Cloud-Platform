@@ -321,7 +321,39 @@ installDarwinDependencies() {
     fi
 }
 
+clusterReadiness() {
+    while [ ${cluster_readiness} -lt 3 ]; do
+      cluster_readiness=$(kubectl --kubeconfig ~/.kube/${cluster_kubecfg} get nodes | grep Ready | wc -l)
+      printf '.'
+      sleep 10
+    done
+}
+
 setupOrDestroyZabbixServer() {
+
+    if [ ${TERRAFORM_COMMAND} == "apply" ]; then
+      cluster_readiness=0
+      echo "Waiting for cluster readiness"
+      case "${OPTION_1}" in
+        aws)
+          cluster_kubecfg="config.aws"
+          clusterReadiness
+          ;;
+
+        gcp)
+          cluster_kubecfg="config.gcp"
+          clusterReadiness
+          ;;
+
+        all)
+          cluster_kubecfg="config.aws"
+          clusterReadiness
+          cluster_readiness=0
+          cluster_kubecfg="config.gcp"
+          clusterReadiness
+      esac
+    fi
+
     echo "Working directory: $(pwd)"
     ${TERRAFORM} init
     ${TERRAFORM} ${TERRAFORM_COMMAND} -auto-approve -var-file "${TERRAFORM_ROOT}/terraform.tfvars"
