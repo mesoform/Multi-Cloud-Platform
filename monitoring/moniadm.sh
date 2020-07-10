@@ -51,6 +51,7 @@ mkdir -p ${BIN}
 
 PATH="${BIN}:${PATH}"
 
+CONFIG_DIR="${SCRIPT_DIR}/../config"
 TERRAFORM="${BIN}/terraform"
 TERRAFORM_BASE="${SCRIPT_DIR}/../terraform"
 TERRAFORM_MODULES="${TERRAFORM_BASE}/modules"
@@ -224,6 +225,13 @@ registerClusterNodes() {
     fi
 }
 
+configSnapshotRepo() {
+  echo "configSnapshotRepo"
+  cp "${TEMPLATES_DIR}/gcs-snaps.sh.template" "${CONFIG_DIR}/${MCP_ENV}/gcs-snaps.sh"
+  sed -i'.sh' "s/GCS-BUCKET/${MCP_GCP_GCS_BUCKET}/" "${CONFIG_DIR}/${MCP_ENV}/gcs-snaps.sh"
+  export GCS_SNAPS_SCRIPT="${CONFIG_DIR}/${MCP_ENV}/gcs-snaps.sh"
+}
+
 installDependencies() {
     echo "Installing dependencies"
 
@@ -364,6 +372,7 @@ case "${COMMAND}" in
   setup)
     generateKubeconfig
     TERRAFORM_COMMAND=apply
+    [[ ${OPTION_1} == "gcp" ]] && configSnapshotRepo
     runSetup
     registerClusterNodes
     ;;

@@ -61,3 +61,5 @@ variable "local_public_ip" {}
 variable "secure_source_ip" {}
 
 variable "expiration_policy" {}
+
+variable "gcs_snaps_script" {}

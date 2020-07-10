@@ -17,3 +17,4 @@ local_public_ip="{{LOCAL_PUBLIC_IP}}/32"
 secure_source_ip="{{SECURE_SOURCE_IP}}/32"
 
 expiration_policy = "{{EXPIRATION_POLICY}}"
+gcs_snaps_script = "{{GCS_SNAPS_SCRIPT}}"

@@ -75,3 +75,4 @@ variable "mcp_topic_name" {}
 
 variable "mcp_subscription_name" {}
 
+variable "gcs_snaps_script" {}

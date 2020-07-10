@@ -99,6 +99,7 @@ module "elk_server" {
   mcp_topic_name              = "${module.gcp_export_logging.mcp_topic_name}"
   mcp_subscription_name       = "${module.gcp_export_logging.mcp_subscription_name}"
   gcp_path_to_credentials     = "${var.gcp_path_to_credentials}"
+  gcs_snaps_script            = "${var.gcs_snaps_script}"
 }
 
 # Zabbix server
@@ -136,4 +137,29 @@ module "kubernetes_daemonset_elk_gcp" {
   elksrv_private_ip = "${module.elk_server.elk_gcp_private_ip}"
   elksrv_public_ip = "${module.elk_server.elk_gcp_public_ip}"
   k8s_cluster_name = "${var.gcp_k8s_cluster_name}"
+}
+
+resource "null_resource" "wait-on-elk-server" {
+
+  provisioner "local-exec" {
+    command = "until $(curl --output /dev/null --silent --head --fail http://${module.elk_server.elk_gcp_public_ip}:5601); do printf '.'; sleep 10; done"
+  }
+}
+
+resource "null_resource" "configure-elk-snapshots" {
+
+  connection {
+    host = "${module.elk_server.elk_gcp_public_ip}"
+    type = "ssh"
+    user = "ubuntu"
+    private_key = "${file("${var.gcp_private_key_path}")}"
+    agent = "true"
+    timeout = "3m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [ "sudo docker exec elasticsearch sh -c 'chown root:root /root/gcs-snaps.sh && chmod +x /root/gcs-snaps.sh && /root/gcs-snaps.sh'" ]
+  }
+
+  depends_on = ["null_resource.wait-on-elk-server"]
 }
