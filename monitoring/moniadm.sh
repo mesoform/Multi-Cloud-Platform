@@ -51,6 +51,7 @@ mkdir -p ${BIN}
 
 PATH="${BIN}:${PATH}"
 
+CONFIG_DIR="${SCRIPT_DIR}/../config"
 TERRAFORM="${BIN}/terraform"
 TERRAFORM_BASE="${SCRIPT_DIR}/../terraform"
 TERRAFORM_MODULES="${TERRAFORM_BASE}/modules"
@@ -224,6 +225,13 @@ registerClusterNodes() {
     fi
 }
 
+configSnapshotRepo() {
+  echo "configSnapshotRepo"
+  cp "${TEMPLATES_DIR}/gcs-snaps.sh.template" "${CONFIG_DIR}/${MCP_ENV}/gcs-snaps.sh"
+  sed -i'.sh' "s/GCS-BUCKET/${MCP_GCP_GCS_BUCKET}/" "${CONFIG_DIR}/${MCP_ENV}/gcs-snaps.sh"
+  export GCS_SNAPS_SCRIPT="${CONFIG_DIR}/${MCP_ENV}/gcs-snaps.sh"
+}
+
 installDependencies() {
     echo "Installing dependencies"
 
@@ -321,7 +329,39 @@ installDarwinDependencies() {
     fi
 }
 
+clusterReadiness() {
+    while [ ${cluster_readiness} -lt 3 ]; do
+      cluster_readiness=$(kubectl --kubeconfig ~/.kube/${cluster_kubecfg} get nodes | grep Ready | wc -l)
+      printf '.'
+      sleep 10
+    done
+}
+
 setupOrDestroyZabbixServer() {
+
+    if [ ${TERRAFORM_COMMAND} == "apply" ]; then
+      cluster_readiness=0
+      echo "Waiting for cluster readiness"
+      case "${OPTION_1}" in
+        aws)
+          cluster_kubecfg="config.aws"
+          clusterReadiness
+          ;;
+
+        gcp)
+          cluster_kubecfg="config.gcp"
+          clusterReadiness
+          ;;
+
+        all)
+          cluster_kubecfg="config.aws"
+          clusterReadiness
+          cluster_readiness=0
+          cluster_kubecfg="config.gcp"
+          clusterReadiness
+      esac
+    fi
+
     echo "Working directory: $(pwd)"
     ${TERRAFORM} init
     ${TERRAFORM} ${TERRAFORM_COMMAND} -auto-approve -var-file "${TERRAFORM_ROOT}/terraform.tfvars"
@@ -332,6 +372,7 @@ case "${COMMAND}" in
   setup)
     generateKubeconfig
     TERRAFORM_COMMAND=apply
+    [[ ${OPTION_1} == "gcp" ]] && configSnapshotRepo
     runSetup
     registerClusterNodes
     ;;

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+/usr/share/elasticsearch/bin/elasticsearch-keystore add-file gcs.client.default.credentials_file /root/.ssh/mcp-service.json
+
+curl -X POST "localhost:9200/_nodes/reload_secure_settings?pretty"
+
+curl -X PUT "localhost:9200/_snapshot/mcp_snaps_repo?pretty" -H 'Content-Type: application/json' -d'
+{
+  "type": "gcs",
+  "settings": {
+    "bucket": "GCS-BUCKET"
+  }
+}
+'
+
+curl -X PUT "localhost:9200/_slm/policy/daily-snapshots?pretty" -H 'Content-Type: application/json' -d'
+{
+  "schedule": "0 30 1 * * ?",
+  "name": "<daily-snap-{now/d}>",
+  "repository": "mcp_snaps_repo",
+  "config": {
+    "indices": ["*"]
+  },
+  "retention": {
+    "expire_after": "30d",
+    "min_count": 5,
+    "max_count": 50
+  }
+}
+'

@@ -53,6 +53,23 @@ resource "google_compute_instance" "elk_server" {
     ssh-keys = "${var.gcp_ssh_user}:${file(var.gcp_public_key_path)}"
   }
 
+  provisioner "file" {
+    source = "${var.gcp_path_to_credentials}"
+    destination = "~/.ssh/mcp-service.json"
+  }
+
+  provisioner "file" {
+    source = "${var.gcs_snaps_script}"
+    destination = "~/gcs-snaps.sh"
+  }
+
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    private_key = "${file("${var.gcp_private_key_path}")}"
+    agent = "false"
+  }
+
   metadata_startup_script = "${data.template_file.install_elk.rendered}"
 }
 

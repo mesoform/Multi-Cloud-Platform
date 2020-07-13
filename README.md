@@ -29,6 +29,7 @@ Clone the `mcp-setup` git repository and set environment variables locally on yo
     export MCP_AWS_PRIVATE_KEY_PATH="~/.ssh/id_rsa"
     export MCP_GCP_PROJECT_ID="mcp-testing"
     export MCP_GCP_CREDENTIALS_PATH="~/.ssh/gcp-service-account.json"
+    export MCP_GCP_GCS_BUCKET="mcp-testing-elk"
     export MCP_GCP_DEFAULT_REGION="europe-west2"
     export MCP_GCP_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"
     export MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"
@@ -62,6 +63,7 @@ Default variables values are as follows:
     # GCP
     MCP_GCP_PROJECT_ID=""                          # gcp project id. E.g. MCP_GCP_PROJECT_ID=mcp-testing
     MCP_GCP_CREDENTIALS_PATH=""                    # gcp service account credentials. E.g. MCP_GCP_CREDENTIALS_PATH=~/.ssh/gcp-credentials.json
+    MCP_GCP_GCS_BUCKET=""                          # gcp gcs bucket to store elastic snapshots
     MCP_GCP_DEFAULT_REGION="europe-west2"          # gcp default region
     MCP_GCP_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"    # auth public rsa key
     MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key

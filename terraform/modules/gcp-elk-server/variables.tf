@@ -57,6 +57,10 @@ variable "gcp_ssh_user" {}
 
 variable "gcp_public_key_path" {}
 
+variable "gcp_private_key_path" {}
+
+variable "gcp_path_to_credentials" {}
+
 variable "gcp_disk_type" {
   default = "pd-ssd"
   description = "The GCE disk type. One of pd-standard or pd-ssd"
@@ -70,3 +74,5 @@ variable "gcp_disk_size" {
 variable "mcp_topic_name" {}
 
 variable "mcp_subscription_name" {}
+
+variable "gcs_snaps_script" {}

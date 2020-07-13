@@ -54,8 +54,12 @@ variable "gcp_ssh_user" {}
 
 variable "gcp_public_key_path" {}
 
+variable "gcp_private_key_path" {}
+
 variable "local_public_ip" {}
 
 variable "secure_source_ip" {}
 
 variable "expiration_policy" {}
+
+variable "gcs_snaps_script" {}

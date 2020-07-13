@@ -27,6 +27,7 @@ print_env_vars() {
   echo "MCP_AWS_PRIVATE_KEY_PATH:" ${MCP_AWS_PRIVATE_KEY_PATH}
   echo "MCP_GCP_PROJECT_ID:" ${MCP_GCP_PROJECT_ID}
   echo "MCP_GCP_CREDENTIALS_PATH:" ${MCP_GCP_CREDENTIALS_PATH}
+  echo "MCP_GCP_GCS_BUCKET:" ${MCP_GCP_GCS_BUCKET}
   echo "MCP_GCP_DEFAULT_REGION:" ${MCP_GCP_DEFAULT_REGION}
   echo "MCP_GCP_PUBLIC_KEY_PATH:" ${MCP_GCP_PUBLIC_KEY_PATH}
   echo "MCP_GCP_PRIVATE_KEY_PATH:" ${MCP_GCP_PRIVATE_KEY_PATH}
@@ -45,6 +46,7 @@ verify_env_vars() {
   gcp)
     [[ -z "${MCP_GCP_PROJECT_ID}" ]] && echo "No GCP project selected" && exit 1
     [[ -z "${MCP_GCP_CREDENTIALS_PATH}" ]] && echo "No GCP credentials selected" && exit 1
+    [[ -z "${MCP_GCP_GCS_BUCKET}" ]] && echo "No GCP GCS bucket selected" && exit 1
     ;;
 
   all)
@@ -120,6 +122,8 @@ export_env_vars() {
   export MCP_GCP_PROJECT_ID=${MCP_GCP_PROJECT_ID:-}
   # gcp service account credentials
   export MCP_GCP_CREDENTIALS_PATH=${MCP_GCP_CREDENTIALS_PATH:-}
+  # gcp gcs bucket name for elastic snapshots
+  export MCP_GCP_GCS_BUCKET=${MCP_GCP_GCS_BUCKET:-}
   # gcp default region
   export MCP_GCP_DEFAULT_REGION=${MCP_GCP_DEFAULT_REGION:-europe-west2}
   # auth public rsa key
