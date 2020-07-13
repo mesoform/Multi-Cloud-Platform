@@ -99,14 +99,6 @@ resource "kubernetes_daemonset" "filebeat" {
             name = "ELK_SRV_PUB_IP"
             value = "${var.elksrv_public_ip}"
           }
-          env {
-            name = "ELASTIC_CLOUD_ID"
-            value = ""
-          }
-          env {
-            name = "ELASTIC_CLOUD_AUTH"
-            value = ""
-          }
           security_context {
             run_as_user = 0
           }

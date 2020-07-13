@@ -19,9 +19,6 @@ processors:
   - add_cloud_metadata:
   - add_host_metadata:
 
-cloud.id: $${ELASTIC_CLOUD_ID}
-cloud.auth: $${ELASTIC_CLOUD_AUTH}
-
 output.logstash:
   hosts: ['${elksrv_private_ip}:5044']
   index: "${k8s_cluster_name}"
