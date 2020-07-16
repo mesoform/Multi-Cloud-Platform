@@ -1,23 +1,19 @@
-filebeat.inputs:
-  - type: container
-    paths:
-      - /var/log/containers/*.log
-    processors:
-      - add_kubernetes_metadata:
-          host: $${NODE_NAME}
-          matchers:
-            - logs_path:
-                logs_path: "/var/log/containers/"
-# To enable hints based autodiscover, remove `filebeat.inputs` configuration and uncomment this:
+filebeat.config:
+  inputs:
+    # Mounted `filebeat-inputs` configmap:
+    path: $${path.config}/inputs.d/*.yml
+    # Reload inputs configs as they change:
+    reload.enabled: false
+  modules:
+    path: $${path.config}/modules.d/*.yml
+    # Reload module configs as they change:
+    reload.enabled: false
+
+# To enable hints based autodiscover, remove `filebeat.config.inputs` configuration and uncomment this:
 #filebeat.autodiscover:
 #  providers:
 #    - type: kubernetes
-#      node: $${NODE_NAME}
 #      hints.enabled: true
-#      hints.default_config:
-#        type: container
-#        paths:
-#          - /var/log/containers/*$${data.kubernetes.container.id}.log
 
 processors:
   - add_cloud_metadata:

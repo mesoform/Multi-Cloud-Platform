@@ -48,7 +48,7 @@ mkdir -p "$WORK_DIR/elk/logstash"
 echo "version: '2'
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -60,7 +60,7 @@ services:
       - /home/ubuntu/gcs-snaps.sh:/root/gcs-snaps.sh
     command: sh -c \"yes | elasticsearch-plugin install repository-gcs && /usr/local/bin/docker-entrypoint.sh\"
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.6.0
+    image: docker.elastic.co/kibana/kibana:7.8.0
     container_name: kibana
     environment:
       SERVER_NAME: kibana
@@ -69,7 +69,7 @@ services:
     ports:
       - 5601:5601
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.6.0
+    image: docker.elastic.co/logstash/logstash:6.7.2
     container_name: logstash
     ports:
       - 5044:5044
@@ -103,13 +103,25 @@ output {
   if \"pubsub\" in [tags] {
     elasticsearch {
       hosts    => \"elasticsearch:9200\"
-      index => \"gcp-logstash-%%{+yyyy.MM.dd}\"
+      index => \"gcp-audit-%%{+yyyy.MM.dd}\"
     }
   }
   if \"beats\" in [tags] {
-    elasticsearch {
-      hosts    => \"elasticsearch:9200\"
-      index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+    if [@metadata][beat] == \"zabbix-server\" {
+        elasticsearch {
+            hosts    => \"elasticsearch:9200\"
+            index => \"%%{[@metadata][beat]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+        }
+    } else if [kubernetes][namespace] {
+        elasticsearch {
+            hosts    => \"elasticsearch:9200\"
+            index => \"%%{[@metadata][beat]}-%%{[kubernetes][namespace]}-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+        }
+    } else {
+        elasticsearch {
+            hosts    => \"elasticsearch:9200\"
+            index => \"%%{[@metadata][beat]}-errors-%%{[@metadata][version]}-%%{+yyyy.MM.dd}\"
+        }
     }
   }
 }

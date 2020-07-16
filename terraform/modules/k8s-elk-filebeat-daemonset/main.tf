@@ -10,6 +10,10 @@ data "template_file" "filebeat" {
   }
 }
 
+data "template_file" "kubernetes" {
+  template = "${file("${path.module}/files/kubernetes.yml.tpl")}"
+}
+
 resource "null_resource" "before" {
 }
 
@@ -33,6 +37,22 @@ resource "kubernetes_config_map" "filebeat_config" {
 
   data = {
     "filebeat.yml" = "${data.template_file.filebeat.rendered}"
+  }
+
+  depends_on = ["null_resource.delay"]
+}
+
+resource "kubernetes_config_map" "filebeat_inputs" {
+  metadata {
+    name = "filebeat-inputs"
+    namespace = "kube-system"
+    labels {
+      k8s-app = "filebeat"
+    }
+  }
+
+  data = {
+    "kubernetes.yml" = "${data.template_file.kubernetes.rendered}"
   }
 
   depends_on = ["null_resource.delay"]
@@ -62,24 +82,15 @@ resource "kubernetes_daemonset" "filebeat" {
       spec {
         service_account_name = "filebeat"
         termination_grace_period_seconds = "30"
-        host_network = true
-        dns_policy = "ClusterFirstWithHostNet"
+        dns_policy = "ClusterFirst"
+        automount_service_account_token = true
         container {
           name = "filebeat"
-          image = "docker.elastic.co/beats/filebeat:7.6.0"
+          image = "docker.elastic.co/beats/filebeat:6.7.2"
           args = [
-            "-c",
-            "/etc/filebeat.yml",
+            "-c", "/etc/filebeat.yml",
             "-e",
           ]
-          env {
-            name = "NODE_NAME"
-            value_from {
-              field_ref {
-                field_path = "spec.nodeName"
-              }
-            }
-          }
           env {
             name = "ELK_SERVER_HOST"
             value = "${var.elksrv_private_ip}"
@@ -89,7 +100,7 @@ resource "kubernetes_daemonset" "filebeat" {
             value = "${var.elksrv_public_ip}"
           }
           security_context {
-            privileged = true
+            run_as_user = 0
           }
           resources {
             requests {
@@ -108,17 +119,17 @@ resource "kubernetes_daemonset" "filebeat" {
             sub_path    = "filebeat.yml"
           }
           volume_mount {
+            name        = "inputs"
+            mount_path  = "/usr/share/filebeat/inputs.d"
+            read_only   = true
+          }
+          volume_mount {
             name        = "data"
             mount_path  = "/usr/share/filebeat/data"
           }
           volume_mount {
             name        = "varlibdockercontainers"
             mount_path  = "/var/lib/docker/containers"
-            read_only   = true
-          }
-          volume_mount {
-            name        = "varlog"
-            mount_path  = "/var/log"
             read_only   = true
           }
         }
@@ -136,15 +147,17 @@ resource "kubernetes_daemonset" "filebeat" {
           }
         }
         volume {
-          name = "varlog"
-          host_path {
-            path = "/var/log"
+          name = "inputs"
+          config_map {
+            name = "filebeat-inputs"
+            default_mode = "0600"
           }
         }
         volume {
           name = "data"
           host_path {
             path = "/var/lib/filebeat-data"
+            type = "DirectoryOrCreate"
           }
         }
         toleration {

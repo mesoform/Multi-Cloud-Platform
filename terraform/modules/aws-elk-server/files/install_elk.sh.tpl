@@ -48,7 +48,7 @@ mkdir -p "$WORK_DIR/elk/logstash"
 echo "version: '2'
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -56,7 +56,7 @@ services:
       - 9200:9200
       - 9300:9300
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.6.0
+    image: docker.elastic.co/kibana/kibana:7.8.0
     container_name: kibana
     environment:
       SERVER_NAME: kibana
@@ -65,7 +65,7 @@ services:
     ports:
       - 5601:5601
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.6.0
+    image: docker.elastic.co/logstash/logstash:6.7.2
     container_name: logstash
     ports:
       - 5044:5044
