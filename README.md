@@ -1,6 +1,8 @@
-# Multi cloud platform scripts
+# Mesoform Multi-Cloud Plaform
 
-Multi cloud platform contains scripts and configurations to run interactive deployment of Triton Kubernetes solution on AWS and/or GCP along with Zabbix monitoring and Elastic Stack logging.
+This repository contains the scripts and configurations to run interactive deployment of Triton 
+Kubernetes solution. Our current implementation of a container platform deployment across multiple 
+Cloud providers
 
 ## Quick start guide
 
@@ -143,3 +145,11 @@ To check exported variables on current shell run the following command: `env | g
 
 
 - A multi-cloud setup on both AWS and GCP currently only allows the creation of Zabbix and Elastic Stack servers on AWS. 
+
+```
+./mcadm.sh destroy manager
+```
+
+## Official stuff
+- [Contributing](https://github.com/mesoform/Multi-Cloud-Platform/CONTRIBUTING.md)
+- [Licence](https://github.com/mesoform/Multi-Cloud-Platform/LICENSE)
