@@ -1,6 +1,8 @@
-# Multi cloud plaform scripts
+# Mesoform Multi-Cloud Plaform
 
-Multi clund platform contains scripts and configurations to run interactive deployment of Triton Kubernetes solution.
+This repository contains the scripts and configurations to run interactive deployment of Triton 
+Kubernetes solution. Our current implementation of a container platform deployment across multiple 
+Cloud providers
 
 ## Quick start guide
 
@@ -93,3 +95,7 @@ To remove all the resources created by script run the command
 ```
 ./mcadm.sh destroy manager
 ```
+
+## Official stuff
+- [Contributing](https://github.com/mesoform/Multi-Cloud-Platform/CONTRIBUTING.md)
+- [Licence](https://github.com/mesoform/Multi-Cloud-Platform/LICENSE)
