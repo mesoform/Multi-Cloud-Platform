@@ -341,6 +341,7 @@ components:
 
 # Contributing
 Please read:
+
 * [CONTRIBUTING.md](https://github.com/mesoform/documentation/blob/master/CONTRIBUTING.md)
 * [CODE_OF_CONDUCT.md](https://github.com/mesoform/documentation/blob/master/CODE_OF_CONDUCT.md)
 
