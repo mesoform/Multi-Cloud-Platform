@@ -1,10 +1,10 @@
 # Mesoform Multi-Cloud Platform
 
 * [Mesoform Multi-Cloud Platform](#mesoform-multi-cloud-platform)
-  * [Information](#Information)
+  * [Background](#Background)
 * [This Repository](#this-repository)
   * [Quick start guide](#quick-start-guide)
-* [MMCF](#MMCF)
+* [MCCF](#MCCF)
   * [Attributes](#attributes)
   * [Project top-level attributes](#project-top-level-attributes)
   * [Adapter top-level attributes](#adapter-top-level-attributes)
@@ -15,14 +15,14 @@
 * [Contributing](#Contributing)
 * [License](#License)
 
-## Information
-Mesoform Multi-Cloud Platform (MCP) is a concept, and supporting infrastructure code which simplifies the deployment of
+## Background
+Mesoform Multi-Cloud Platform (MCP) is a set of tools and supporting infrastructure code which simplifies the deployment of
 applications across multiple Cloud providers. The basis behind MCP is for platform engineers and application
 engineers to be working with a single structure and configuration for deploying foundational infrastructure (like IAM
 policies, Google App Engine or Kubernetes clusters) as would be used for deploying workloads to that infrastructure
 (e.g. Containers/Pods).
 
-Within this framework is a unified configuration language called Mesoform Multi-Cloud Configuration Format (or MMCF),
+Within this framework is a unified configuration language called Mesoform Multi-Cloud Configuration Format (or MCCF),
 which is detailed below and provides a familiar YAML structure to what many of the native original services offer and
 adapts it into HCL, the language of Hashicorp Terraform, and deploys it using Terraform, to gain the benefits (like
 state management) which Terraform offers.
@@ -37,7 +37,7 @@ platform. Including necessary Cloud resources like networking; and basic monitor
 Clone the `mcp-setup` git repository and set environment variables locally on your current shell:
 
 E.g:
-
+  ```bash
     export MCP_ENV="test"
     export MCP_BASE_MANAGER_CLOUD="aws"
     export MCP_BASE_MANAGER_NAME="manager"
@@ -62,13 +62,13 @@ E.g:
     export MCP_GCP_PUBLIC_KEY_PATH="~/.ssh/id_rsa.pub"
     export MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"
     export SECURE_SOURCE_IP="147.161.96.35"
-    ```
+  ```
 
 `MCP_AWS_ACCESS_KEY`, `MCP_AWS_SECRET_KEY` and/or `MCP_GCP_PROJECT_ID`, `MCP_GCP_CREDENTIALS_PATH` are mandatory and do
 not have a default value.
 
 Default variables values are as follows:
-
+  ```bash
     MCP_ENV="test"                                 # deployment environment (dev/test/prod/etc.)
     # RANCHER
     MCP_BASE_MANAGER_CLOUD="aws"                   # default cloud provider for rancher manager: aws or gcp
@@ -98,71 +98,70 @@ Default variables values are as follows:
     MCP_GCP_PRIVATE_KEY_PATH="~/.ssh/id_rsa"       # auth private rsa key
     # SECURE SOURCE IP
     SECURE_SOURCE_IP="80.229.44.137"               # any secure IP to add to the monitoring services (Zabbix/ELK) firewalls
-
+  ```
 Exported variables on your shell will take precedence from the defined default values.
 
 To check exported variables on current shell run the following command: `env | grep MCP`
 
 ### Deployment
 - To deploy resources run `setup` command and specify cloud name (aws|gcp|all):
-
-     E.g: `./mcadm.sh setup aws`
+  ```bash
+  ./mcadm.sh setup aws
+  ```
 
 ### Cleanup
 - To remove all the resources deployed run the `destroy` command:
-
-      E.g: `./mcadm.sh destroy manager`
+  ```bash
+  ./mcadm.sh destroy manager
+  ```
 
 ### Adding nodes to a cluster
-- To add a node (etcd|control|worker) to an existing cluster run the add command:
-
-      E.g: add a new worker node to an AWS cluster:
-      `./mcadm.sh add wnode config/test/test-aws-cluster.yaml`
+- To add a node (etcd | control | worker) to an existing cluster run the add command:
+  ```bash
+  ./mcadm.sh add wnode config/test/test-aws-cluster.yaml # add new worker node to an AWS cluster
+  ```
 
 ### Removing nodes from an existing cluster
 - To remove a node (etcd|control|worker) from a cluster run the destroy command:
-
-      E.g: remove a node from an AWS cluster:
-      `./mcadm.sh destroy node config/test/test-aws-cluster.yaml`
-
-     A prompt will ask you which node to remove 
+  ```bash
+  ./mcadm.sh destroy node config/test/test-aws-cluster.yaml # remove a node from an AWS cluster
+  ```
+  A prompt will ask you which node to remove
 
 ### Getting information about manager or cluster
 - To get information about a manager or a cluster run the get command:
+  ```bash
+  ./mcadm.sh get manager # information about the cluster manager
+  ```
 
-      E.g: to get information about the cluster manager:
-      `./mcadm.sh get manager`
-
-### help
+### Help
 - Run `./mcadm.sh help` to see details about script usage
+
+## Tips and tricks
+
 - The information about the Kubernetes Cluster Manager will be shown in the console output. Rancher manager UI user:
-  admin
-
-      E.g:
-      `rancher_access_key = token-1abcd`
-      `rancher_secret_key = xyz1xyz2xyz`
-      `rancher_url = https://3.4.1.2`
-
-- Use SECURE_SOURCE_IP to add any IP to the monitoring services firewalls so Zabbix Web and Kibana UI can be reached
+  `admin`
+  ```
+  rancher_access_key = token-1abcd
+  rancher_secret_key = xyz1xyz2xyz
+  rancher_url = https://3.4.1.2
+  ```
+- Use `SECURE_SOURCE_IP` to add any IP to the monitoring services firewalls so Zabbix Web and Kibana UI can be reached
   from that IP
-- The Zabbix Web Frontend can be accessed on a browser using the public Zabbix Server IP. User: Admin
-- Kibana UI can be accessed on a browser using the public ELK Server IP and port 5601
+- The Zabbix Web Frontend can be accessed on a browser using the public Zabbix Server IP. User: `Admin`
+- Kibana UI can be accessed from a browser using the public ELK Server IP and port 5601
 - A multi-cloud setup on both AWS and GCP currently only allows the creation of Zabbix and Elastic Stack servers on AWS.
 
-```
-./mcadm.sh destroy manager
-```
 
-
-# MMCF
-MMCF is a YAML-based configuration allowing for simple mapping of platform APIs for deploying applications or services
+# MCCF
+MCCF is a YAML-based configuration allowing for simple mapping of platform APIs for deploying applications or services
 (A/S). It follows the YAML 1.2 specification.
 
 ## Attributes
-MMCF has some top-level attributes which can be defined with any adapter.
+MCCF has some top-level attributes which can be defined with any adapter.
 
 ### Project top-level attributes
-The first set of attributes are generic attributes relating to MMCF and the overall project. They must be set in
+The first set of attributes are generic attributes relating to MCCF and the overall project. They must be set in
 `project.yml` and
 
 | Key           |  Type  | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Default |
@@ -247,7 +246,7 @@ Google App Engine). These files act as a deployment description and define thing
 configuration and other resource settings for the specific target platform.
 
 If your application is made up of a number of microservices, you can structure such Component AS
-(CAS) source code files and resources into sub-directories. Then, in the MMCF file, the deployment
+(CAS) source code files and resources into subdirectories. Then, in the MCCF file, the deployment
 configuration for each CAS each will have its own definition in the `specs` section (described
 below). For example,
 
@@ -267,7 +266,7 @@ Specifications for different target platforms can be found below
 
 ## Setup
 To use the MCP modules to deploy your service, download the `mcpadm.sh` (Linux or Mac), or `mcpadm.ps1` (Windows),
-and run the setup within a `/terraform` sub-directory of your service.
+and run the setup within a `/terraform` subdirectory of your service.
 
 ```
 mesoform-service/
@@ -311,33 +310,11 @@ The `mcpadm` scripts can also get, deploy and destroy terraform infrastructure, 
 management of multiple service versions.
 
 ## Anchors
-For example, [YAML anchors](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) can be used to reference values from 
-other fields. For example, if you wanted `service` to be the same as name, would write:
+We recommend using [YAML anchors](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) to reduce duplication and ensure
+consistency between various configs. Description of this feature is available in a variety of external sources,
+e.g. [simple summary lives here](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors). 
 
-```yaml
-name: &name ecat-admin
-service: *name
-```
-
-Reused anchors overwrite previous values. I.e. when anchors are repeated, the value of the last found anchor will be
-used. For example, with the configuration:
-
-```yaml
-components:
-  common:
-    env_variables:
-      'env': dev
-    threadsafe: True
-    name: &name common-name
-  specs:
-    app1:
-      name: &name ecat-admin
-      runtime: custom
-      env: flex
-      service: *name
-```
-
-`service` will evaluate to `ecat-admin`
+Look out for them in our examples above!
 
 # Contributing
 Please read:
