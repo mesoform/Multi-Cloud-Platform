@@ -349,11 +349,12 @@ For us this means having the following tenets:
 * a pipeline for deploying changes to control unit configurations (e.g. Cloud Build)
 * a step in the pipeline for checking changes against compliance policies (e.g. CB step to check config against OpenPolicy Agent policy)
 * a system for running control unit containers (e.g. Docker Swarm Stack)
-* a system for storing control unit configuration (e.g. Docker Swarm Configs (or Consul))
+* a version control system for change management of control unit configuration (e.g. Cloud Source Repositories (or Github))
+* a system for live control unit configuration (e.g. Docker Swarm Configs (or Consul))
 * a system for managing dependencies between control units (e.g. Consul)
 * a system for containing configuration drift (e.g. supervisord to regularly restart `terraform apply` )
 
-![Basic process](/Users/gaz/IdeaProjects/Multi-Cloud-Platform/assets/MCCU process.png)
+![Basic process](assets/MCCU process.png)
 
 
 # Contributing
