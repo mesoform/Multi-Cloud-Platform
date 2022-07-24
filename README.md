@@ -354,7 +354,7 @@ For us this means having the following tenets:
 * a system for managing dependencies between control units (e.g. Consul)
 * a system for containing configuration drift (e.g. supervisord to regularly restart `terraform apply` )
 
-![Basic process](assets/MCCU process.png)
+![Basic process](https://github.com/mesoform/Multi-Cloud-Platform/blob/04403ca38ef221a64f470901a5a02c872fcbdd74/assets/MCCU%20process.png)
 
 
 # Contributing
