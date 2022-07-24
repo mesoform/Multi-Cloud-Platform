@@ -12,6 +12,7 @@
   * [Foundation adapters](#foundation-adapters)
   * [Structure](#Structure)
   * [Setup](#Setup)
+* [Operations](#operations)
 * [Contributing](#Contributing)
 * [License](#License)
 
@@ -315,6 +316,45 @@ consistency between various configs. Description of this feature is available in
 e.g. [simple summary lives here](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors). 
 
 Look out for them in our examples above!
+
+# Operations
+As with most things IT, there are many ways in which an operations team could manage all of our foundations and services.
+ Some ideas are briefly described below.
+
+## Monitoring & Logging
+An essential part of running any services is to make keep an eye on performance & availability, and have an event
+ (logging) system for debugging, audit and security. See the [docs](monitoring/README.md) in the monitoring directory
+
+## Deployment Management
+Ensuring we have consistent deployments which we can test, control changes and ensure drift is corrected is another
+ important factor of service reliability engineering. Below is concept that expands upon the MCCF to being used as a 
+ means for platform teams to be able to control the security and stability of a platform whilst also allowing as much 
+ freedom for application teams to work entirely independently. This is a description of a service oriented organisation.
+ In this setup, the platform team provides a service to other teams to be able to manage all of their own cloud project
+ or account without having to raise requests to the platform team to perform some other work which need to be controlled
+ for some reason (lke security in the case of IAM).
+
+In this world, what the platform team is responsible for is what we call control units. A control unit could be an IAM
+ policy or a data store or a network. See the Multi-Cloud Platform Foundations repository for examples.
+
+What we're looking to do in this scenario is to create a consistent build for each application team's environment where
+ changes to their environment's configuration automatically updates the live platform. Also, each deployment needs to be
+ well isolated and any changes which are performed outside-of the configuration change process are automatically
+ corrected back to what has been approved.
+
+For us this means having the following tenets:
+* container images for each control unit's code (e.g. an image with Terraform and an HCL deployment module)
+* a CICD pipeline for testing and delivering that image to an image registry (e.g. Cloud Build (CB))
+* a process for testing changes to our control unit spec (MCCF in our case) (e.g. CB step for YAML linting)
+* a pipeline for deploying changes to control unit configurations (e.g. Cloud Build)
+* a step in the pipeline for checking changes against compliance policies (e.g. CB step to check config against OpenPolicy Agent policy)
+* a system for running control unit containers (e.g. Docker Swarm Stack)
+* a system for storing control unit configuration (e.g. Docker Swarm Configs (or Consul))
+* a system for managing dependencies between control units (e.g. Consul)
+* a system for containing configuration drift (e.g. supervisord to regularly restart `terraform apply` )
+
+![Basic process](/Users/gaz/IdeaProjects/Multi-Cloud-Platform/assets/MCCU process.png)
+
 
 # Contributing
 Please read:
