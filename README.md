@@ -13,6 +13,8 @@
   * [Structure](#Structure)
   * [Setup](#Setup)
 * [Operations](#operations)
+  * [Monitoring and Logging](#monitoring--logging)
+  * [Deployment](#deployment)
 * [Contributing](#Contributing)
 * [License](#License)
 
